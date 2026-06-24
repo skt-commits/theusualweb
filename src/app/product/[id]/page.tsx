@@ -5,6 +5,18 @@ import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Star } from 'lucide-react';
 
+export function generateStaticParams() {
+  const slugs = ['mens', 'womens', 'children', 'new-arrivals', 'accessories', 'offer-zone'];
+  const ids = [];
+  slugs.forEach(slug => {
+    for (let i = 0; i < 8; i++) {
+      ids.push({ id: `${slug}-${i}` });
+    }
+  });
+  ids.push({ id: 'na1' }, { id: 'na2' }, { id: 'na3' });
+  return ids;
+}
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   

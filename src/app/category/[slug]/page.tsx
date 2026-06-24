@@ -35,6 +35,18 @@ const getProducts = (slug: string) => {
   };
 };
 
+export function generateStaticParams() {
+  return [
+    { slug: 'mens' },
+    { slug: 'womens' },
+    { slug: 'children' },
+    { slug: 'new-arrivals' },
+    { slug: 'accessories' },
+    { slug: 'offer-zone' },
+    { slug: 'search' }
+  ];
+}
+
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { title, products } = getProducts(slug);
