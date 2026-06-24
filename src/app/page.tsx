@@ -5,19 +5,43 @@ import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 
+import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useState, useEffect } from 'react';
+
 const CATEGORIES = [
-  { id: 'girls', title: 'GIRLS FASHION', image: '/TheUsualsWeb/images/girls_vibrant.png', link: '/category/girls' },
-  { id: 'boys', title: 'BOYS FASHION', image: '/TheUsualsWeb/images/boys_vibrant.png', link: '/category/boys' },
-  { id: 'toddlers', title: 'TODDLERS & INFANTS', image: '/TheUsualsWeb/images/toddlers_vibrant.png', link: '/category/toddlers' },
+  { id: 'girls', title: 'GIRLS FASHION', image: '/images/girls_vibrant.png', link: '/category/girls' },
+  { id: 'boys', title: 'BOYS FASHION', image: '/images/boys_vibrant.png', link: '/category/boys' },
+  { id: 'toddlers', title: 'TODDLERS & INFANTS', image: '/images/toddlers_vibrant.png', link: '/category/toddlers' },
 ];
 
-const NEW_ARRIVALS = [
-  { id: 'na1', name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/TheUsualsWeb/images/girls_vibrant.png" },
-  { id: 'na2', name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/TheUsualsWeb/images/boys_vibrant.png" },
-  { id: 'na3', name: "Cozy Bear Onesie", price: "₹ 899", image: "/TheUsualsWeb/images/toddlers_vibrant.png" },
+const FALLBACK_NEW_ARRIVALS = [
+  { id: 'na1', name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/images/girls_vibrant.png" },
+  { id: 'na2', name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/images/boys_vibrant.png" },
+  { id: 'na3', name: "Cozy Bear Onesie", price: "₹ 899", image: "/images/toddlers_vibrant.png" },
 ];
 
 export default function Home() {
+  const [newArrivals, setNewArrivals] = useState<any[]>(FALLBACK_NEW_ARRIVALS);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // Fetch up to 3 most recent products
+        const q = query(collection(db, 'products'), limit(3));
+        const snapshot = await getDocs(q);
+        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        if (products.length > 0) {
+          setNewArrivals(products);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
   return (
     <main>
       <div style={{ paddingTop: '80px' }}>
@@ -129,7 +153,7 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-3">
-            {NEW_ARRIVALS.map((product, index) => (
+            {newArrivals.map((product, index) => (
               <motion.div 
                 key={product.id} 
                 className="product-card"
@@ -148,7 +172,7 @@ export default function Home() {
                     <h4 className="product-name">{product.name}</h4>
                   </Link>
                   <span className="product-price">{product.price}</span>
-                  <div className="product-add" style={{ marginTop: '1rem' }}>
+                  <div className="product-add">
                     <AddToCartButton product={product} fullWidth />
                   </div>
                 </div>

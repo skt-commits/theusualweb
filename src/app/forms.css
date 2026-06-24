@@ -11,11 +11,11 @@
 }
 .form-input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .auth-card { background: white; max-width: 450px; margin: 4rem auto; padding: 3rem; text-align: center; border: 1px solid var(--border-color); }
-.page-header { padding: 8rem 0 4rem 0; text-align: center; background: var(--primary); margin-bottom: 3rem; color: white; }
+.page-header { padding: 12rem 0 5rem 0; text-align: center; background: var(--primary); margin-bottom: 3rem; color: white; }
 .page-header p, .page-header h1 { color: white !important; }
 .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: white; }
 .cart-item img { width: 100px; height: 120px; object-fit: cover; }
-.cart-summary { background: var(--secondary); padding: 2.5rem; border: 1px solid var(--border-color); }
+.cart-summary { background: white; padding: 2.5rem; border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 .checkout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; }
 @media (max-width: 768px) {
   .checkout-grid { grid-template-columns: 1fr; }

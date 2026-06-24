@@ -3,6 +3,7 @@ import './globals.css';
 import './forms.css';
 import Navbar from '@/components/Navbar';
 import { CartProvider } from '@/context/CartContext';
+import { AuthProvider } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -18,8 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <CartProvider>
-          <Navbar />
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
           <div style={{ minHeight: 'calc(100vh - 400px)' }}>
             {children}
           </div>
@@ -70,7 +72,8 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
-        </CartProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

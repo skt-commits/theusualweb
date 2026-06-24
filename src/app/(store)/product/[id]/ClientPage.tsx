@@ -1,40 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Star } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function ClientPage({ id }: { id: string }) {
-  
-  // Dummy data generator
-  const getProduct = () => {
-    // In a real app we fetch from Firebase using id
-    return {
-      id: id,
-      name: id.includes('mens') ? "Men's Classic Selection" : 
-            id.includes('womens') ? "Women's Elegant Signature" : 
-            "Premium Quality Signature Collection Item",
-      price: "₹ 1,499",
-      image: id.includes('girls') ? '/TheUsualsWeb/images/girls.png' : 
-             id.includes('womens') ? '/TheUsualsWeb/images/womens.png' : 
-             id.includes('mens') ? '/TheUsualsWeb/images/mens.png' : '/TheUsualsWeb/images/boys.png',
-      description: "Experience the ultimate in comfort and style with our Premium Signature Collection. Crafted from the finest materials, this piece features a modern silhouette that seamlessly blends elegance with everyday wearability. Perfect for any occasion, its durable construction ensures it remains a staple in your wardrobe for seasons to come.",
-      features: [
-        "100% Premium Organic Cotton",
-        "Breathable and lightweight fabric",
-        "Machine washable, tumble dry low",
-        "Designed and crafted with love"
-      ]
-    };
-  };
-
-  const product = getProduct();
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState('');
   const [review, setReview] = useState('');
   const [reviews, setReviews] = useState([
     { id: 1, author: "Priya S.", rating: 5, text: "Absolutely love the quality! It fits perfectly and the material is so soft." },
     { id: 2, author: "Rahul M.", rating: 4, text: "Great product for the price. The color is exactly as shown in the pictures." }
   ]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const docRef = doc(db, 'products', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProduct({ id: docSnap.id, ...data });
+          // Set initial active image from array or fallback to single image
+          setActiveImage(data.images && data.images.length > 0 ? data.images[0] : data.image);
+        } else {
+          console.error("No such product!");
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      }
+      setLoading(false);
+    };
+    fetchProduct();
+  }, [id]);
 
   const submitReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,19 +49,50 @@ export default function ClientPage({ id }: { id: string }) {
     setReview('');
   };
 
+  if (loading) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Loading Product Details...</div>;
+  if (!product) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Product not found.</div>;
+
+  const allImages = product.images || (product.image ? [product.image] : []);
+
   return (
     <main style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
       <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', marginBottom: '4rem' }} className="product-layout-grid">
-          {/* Image */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="glass-panel" 
-            style={{ overflow: 'hidden', borderRadius: '24px' }}
-          >
-            <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', aspectRatio: '3/4' }} />
-          </motion.div>
+          
+          {/* Image Gallery */}
+          <div>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="glass-panel" 
+              style={{ overflow: 'hidden', borderRadius: '24px', marginBottom: '1rem' }}
+            >
+              {activeImage ? (
+                <img src={activeImage} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', aspectRatio: '3/4' }} />
+              ) : (
+                <div style={{ width: '100%', aspectRatio: '3/4', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>No Image</div>
+              )}
+            </motion.div>
+            
+            {/* Thumbnails */}
+            {allImages.length > 1 && (
+              <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                {allImages.map((img: string, index: number) => (
+                  <div 
+                    key={index} 
+                    onClick={() => setActiveImage(img)}
+                    style={{ 
+                      width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer',
+                      border: activeImage === img ? '3px solid var(--primary)' : '3px solid transparent',
+                      opacity: activeImage === img ? 1 : 0.7, transition: 'all 0.2s'
+                    }}
+                  >
+                    <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           
           {/* Details */}
           <motion.div 
@@ -77,11 +110,19 @@ export default function ClientPage({ id }: { id: string }) {
             
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>About this product</h3>
-              <p style={{ color: 'var(--foreground)', lineHeight: 1.6 }}>{product.description}</p>
+              <p style={{ color: 'var(--foreground)', lineHeight: 1.6 }}>
+                {product.description || "Experience the ultimate in comfort and style with our Premium Signature Collection. Crafted from the finest materials, this piece features a modern silhouette that seamlessly blends elegance with everyday wearability."}
+              </p>
             </div>
             
             <ul style={{ color: 'var(--foreground)', marginBottom: '3rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
-              {product.features.map((feat, i) => <li key={i}>{feat}</li>)}
+              {product.features ? product.features.map((feat: string, i: number) => <li key={i}>{feat}</li>) : (
+                <>
+                  <li>Premium Quality Material</li>
+                  <li>Breathable and lightweight fabric</li>
+                  <li>Designed and crafted with love</li>
+                </>
+              )}
             </ul>
             
             <div style={{ maxWidth: '300px' }}>
