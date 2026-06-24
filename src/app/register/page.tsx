@@ -260,7 +260,7 @@ function RegisterContent() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div className="form-group">
                     <label className="form-label">Password</label>
-                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="At least 5 characters" required />
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="At least 5 characters" required autoComplete="new-password" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Confirm Password</label>

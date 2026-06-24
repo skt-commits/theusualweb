@@ -94,7 +94,8 @@ export default function Checkout() {
             <CheckCircle size={64} color="#22c55e" style={{ margin: '0 auto 1.5rem' }} />
             <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Order Confirmed!</h2>
             <p style={{ color: 'var(--foreground)', marginBottom: '2rem' }}>
-              Thank you for your purchase. We have sent an order confirmation email to <strong>{shippingInfo.email}</strong>.
+              Thank you for your purchase. We have sent an order confirmation email to <strong>{shippingInfo.email}</strong>.<br/>
+              <span style={{ fontSize: '0.9rem', color: '#666' }}>(Check your spam section too if not found)</span>
             </p>
             <Link href="/" className="btn btn-primary">Continue Shopping</Link>
           </div>
@@ -139,7 +140,7 @@ export default function Checkout() {
   }
 
   return (
-    <main style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
+    <main style={{ paddingTop: '140px', paddingBottom: '4rem' }}>
       <div className="container">
         <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Secure <span className="text-gradient">Checkout</span></h1>
         

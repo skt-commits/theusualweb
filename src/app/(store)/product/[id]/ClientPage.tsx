@@ -17,10 +17,22 @@ export default function ClientPage({ id }: { id: string }) {
     { id: 2, author: "Rahul M.", rating: 4, text: "Great product for the price. The color is exactly as shown in the pictures." }
   ]);
 
+  const [size, setSize] = useState('M');
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const docRef = doc(db, 'products', id);
+        // Handle IDs coming from Cart which might have size suffixes (e.g. productID-M)
+        let actualId = id;
+        const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+        for (const s of sizes) {
+          if (id.endsWith(`-${s}`)) {
+            actualId = id.substring(0, id.length - s.length - 1);
+            break;
+          }
+        }
+
+        const docRef = doc(db, 'products', actualId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -28,7 +40,22 @@ export default function ClientPage({ id }: { id: string }) {
           // Set initial active image from array or fallback to single image
           setActiveImage(data.images && data.images.length > 0 ? data.images[0] : data.image);
         } else {
-          console.error("No such product!");
+          // Handle Fallback Mock Products from Home Page
+          if (actualId === 'na1') {
+            const fakeData = { id: actualId, name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/images/girls_vibrant.png", description: "A beautifully crafted dress for your little princess.", category: "girls" };
+            setProduct(fakeData);
+            setActiveImage(fakeData.image);
+          } else if (actualId === 'na2') {
+            const fakeData = { id: actualId, name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/images/boys_vibrant.png", description: "Keep them warm and stylish with this modern jacket.", category: "boys" };
+            setProduct(fakeData);
+            setActiveImage(fakeData.image);
+          } else if (actualId === 'na3') {
+            const fakeData = { id: actualId, name: "Cozy Bear Onesie", price: "₹ 899", image: "/images/toddlers_vibrant.png", description: "The softest, most adorable onesie for your toddler.", category: "toddlers" };
+            setProduct(fakeData);
+            setActiveImage(fakeData.image);
+          } else {
+            console.error("No such product!");
+          }
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -115,7 +142,7 @@ export default function ClientPage({ id }: { id: string }) {
               </p>
             </div>
             
-            <ul style={{ color: 'var(--foreground)', marginBottom: '3rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+            <ul style={{ color: 'var(--foreground)', marginBottom: '2rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
               {product.features ? product.features.map((feat: string, i: number) => <li key={i}>{feat}</li>) : (
                 <>
                   <li>Premium Quality Material</li>
@@ -125,8 +152,30 @@ export default function ClientPage({ id }: { id: string }) {
               )}
             </ul>
             
+            <div style={{ marginBottom: '2.5rem' }}>
+              <h4 style={{ fontWeight: 'bold', marginBottom: '0.8rem' }}>Select Size:</h4>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {['S', 'M', 'L', 'XL', 'XXL'].map(sz => (
+                  <button 
+                    key={sz}
+                    onClick={() => setSize(sz)}
+                    style={{ 
+                      width: '45px', height: '45px', borderRadius: '8px', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: size === sz ? '2px solid var(--accent)' : '1px solid var(--border-color)',
+                      background: size === sz ? 'var(--accent)' : 'white',
+                      color: size === sz ? 'white' : 'var(--foreground)',
+                      fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             <div style={{ maxWidth: '300px' }}>
-              <AddToCartButton product={product} fullWidth />
+              <AddToCartButton product={product} fullWidth showGoToCart selectedSize={size} />
             </div>
           </motion.div>
         </div>

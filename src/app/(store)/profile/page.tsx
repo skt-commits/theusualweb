@@ -2,15 +2,29 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { Edit2, Save, X } from 'lucide-react';
 
 export default function UserProfile() {
   const { user, userData, loading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [fetchingOrders, setFetchingOrders] = useState(true);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    company: '',
+    street: '',
+    city: '',
+    state: '',
+    country: '',
+    postalCode: ''
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -22,7 +36,45 @@ export default function UserProfile() {
     if (user) {
       fetchUserOrders();
     }
-  }, [user]);
+    if (userData) {
+      setEditForm({
+        name: userData.name || '',
+        phone: userData.phone || '',
+        company: userData.company || '',
+        street: userData.address?.street || '',
+        city: userData.address?.city || '',
+        state: userData.address?.state || '',
+        country: userData.address?.country || 'India',
+        postalCode: userData.address?.postalCode || ''
+      });
+    }
+  }, [user, userData]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    setSavingProfile(true);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        name: editForm.name,
+        phone: editForm.phone,
+        company: editForm.company,
+        address: {
+          street: editForm.street,
+          city: editForm.city,
+          state: editForm.state,
+          country: editForm.country,
+          postalCode: editForm.postalCode
+        }
+      });
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile.");
+    }
+    setSavingProfile(false);
+  };
 
   const fetchUserOrders = async () => {
     setFetchingOrders(true);
@@ -50,33 +102,95 @@ export default function UserProfile() {
       <div className="container">
         <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>My <span className="text-gradient">Profile</span></h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+        <div className="profile-grid">
           
           {/* Profile Details Card */}
           <div>
-            <div className="glass-panel" style={{ padding: '2rem' }}>
+            <div className="glass-panel" style={{ padding: '2rem', position: 'relative' }}>
+              {!isEditing && (
+                <button 
+                  onClick={() => setIsEditing(true)} 
+                  className="icon-btn" 
+                  style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', color: 'var(--primary)' }}
+                  title="Edit Profile"
+                >
+                  <Edit2 size={20} />
+                </button>
+              )}
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
                   {userData?.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.2rem', margin: 0 }}>{userData?.name || 'User'}</h2>
+                  {isEditing ? (
+                    <input 
+                      type="text" 
+                      value={editForm.name} 
+                      onChange={e => setEditForm({...editForm, name: e.target.value})} 
+                      className="form-input" 
+                      style={{ padding: '0.4rem', marginBottom: '0.5rem' }} 
+                      placeholder="Your Name"
+                    />
+                  ) : (
+                    <h2 style={{ fontSize: '1.2rem', margin: 0 }}>{userData?.name || 'User'}</h2>
+                  )}
                   <p style={{ color: 'var(--foreground)', margin: 0, fontSize: '0.9rem' }}>{user.email}</p>
                 </div>
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
                 <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#666' }}>Personal Details</h3>
-                <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Phone:</strong> {userData?.phone || 'Not provided'}</p>
-                {(userData?.company) && <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Company:</strong> {userData.company}</p>}
+                {isEditing ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <input type="tel" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="form-input" placeholder="Phone Number" />
+                    <input type="text" value={editForm.company} onChange={e => setEditForm({...editForm, company: e.target.value})} className="form-input" placeholder="Company (Optional)" />
+                  </div>
+                ) : (
+                  <>
+                    <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Phone:</strong> {userData?.phone || 'Not provided'}</p>
+                    {(userData?.company) && <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}><strong>Company:</strong> {userData.company}</p>}
+                  </>
+                )}
               </div>
               
-              {userData?.address && (
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }}>
-                  <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#666' }}>Saved Address</h3>
-                  <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.street}</p>
-                  <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.city}, {userData.address.state}</p>
-                  <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.country} - {userData.address.postalCode}</p>
+              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#666' }}>Saved Address</h3>
+                {isEditing ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <input type="text" value={editForm.street} onChange={e => setEditForm({...editForm, street: e.target.value})} className="form-input" placeholder="Street Address" />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <input type="text" value={editForm.city} onChange={e => setEditForm({...editForm, city: e.target.value})} className="form-input" placeholder="City" />
+                      <input type="text" value={editForm.state} onChange={e => setEditForm({...editForm, state: e.target.value})} className="form-input" placeholder="State" />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <input type="text" value={editForm.country} onChange={e => setEditForm({...editForm, country: e.target.value})} className="form-input" placeholder="Country" />
+                      <input type="text" value={editForm.postalCode} onChange={e => setEditForm({...editForm, postalCode: e.target.value})} className="form-input" placeholder="Postal Code" />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {userData?.address ? (
+                      <>
+                        <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.street}</p>
+                        <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.city}, {userData.address.state}</p>
+                        <p style={{ fontSize: '0.9rem', margin: '0.2rem 0' }}>{userData.address.country} - {userData.address.postalCode}</p>
+                      </>
+                    ) : (
+                      <p style={{ fontSize: '0.9rem', color: '#666' }}>No address saved.</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {isEditing && (
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                  <button onClick={handleSaveProfile} disabled={savingProfile} className="btn btn-primary" style={{ flex: 1, padding: '0.6rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                    <Save size={18} /> {savingProfile ? 'Saving...' : 'Save Profile'}
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="btn btn-outline" style={{ padding: '0.6rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <X size={18} /> Cancel
+                  </button>
                 </div>
               )}
             </div>

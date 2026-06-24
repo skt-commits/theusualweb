@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, Search, User, Menu, X, LogOut } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, LogOut } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
@@ -12,22 +12,12 @@ import { signOut } from 'firebase/auth';
 export default function Navbar() {
   const { cartCount } = useCart();
   const { user, isAdmin, userData } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/category/search?q=${searchQuery}`);
-      setIsSearchOpen(false);
-    }
   };
 
   return (
@@ -47,30 +37,13 @@ export default function Navbar() {
           <Link href="/category/mens" className="nav-link">Men's Fashion</Link>
           <Link href="/category/womens" className="nav-link">Women's Fashion</Link>
           <Link href="/contact" className="nav-link">Contact Us</Link>
+          {isAdmin && <Link href="/admin" className="nav-link" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Admin Panel</Link>}
         </div>
         
         <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          {isSearchOpen ? (
-            <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--accent)', paddingBottom: '2px' }}>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ border: 'none', background: 'transparent', outline: 'none', width: '120px', fontSize: '0.9rem' }}
-                autoFocus
-              />
-              <button type="button" onClick={() => setIsSearchOpen(false)} style={{ cursor: 'pointer', color: 'var(--accent)' }}>
-                <X size={18} />
-              </button>
-            </form>
-          ) : (
-            <button className="icon-btn" onClick={() => setIsSearchOpen(true)} style={{ transition: 'transform 0.2s', cursor: 'pointer' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}><Search size={22} /></button>
-          )}
           
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {isAdmin && <Link href="/admin" className="nav-link" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Admin</Link>}
               <Link href="/profile" className="icon-btn" title="My Profile" style={{ transition: 'transform 0.2s', display: 'block' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                 <User size={22} />
               </Link>

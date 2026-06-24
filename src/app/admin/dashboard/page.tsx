@@ -148,7 +148,14 @@ export default function AdminDashboard() {
         {/* Contact Messages Section */}
         <div className="glass-panel" style={{ overflow: 'hidden' }}>
           <div onClick={() => toggleSection('messages')} style={{ padding: '1.5rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: expandedSection === 'messages' ? 'rgba(0,0,0,0.02)' : 'transparent' }}>
-            <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MessageSquare size={20}/> Recent Customer Messages</h2>
+            <h2 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <MessageSquare size={20}/> Recent Customer Messages
+              {messages.length > 0 && (
+                <span style={{ background: '#ef4444', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold', marginLeft: '0.5rem' }}>
+                  {messages.length}
+                </span>
+              )}
+            </h2>
             {expandedSection === 'messages' ? <ChevronUp /> : <ChevronDown />}
           </div>
           {expandedSection === 'messages' && (

@@ -5,7 +5,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [status, setStatus] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,7 +18,7 @@ export default function ContactPage() {
         createdAt: new Date().toISOString()
       });
       setStatus('Message sent successfully!');
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
       console.error(error);
       setStatus('Failed to send message.');
@@ -34,20 +34,24 @@ export default function ContactPage() {
         </div>
       </div>
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem' }}>
+        <div className="contact-grid">
           <div>
             <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Send us a message</h2>
             <form onSubmit={handleSubmit} className="glass-panel" style={{ padding: '2rem' }}>
               <div className="form-group">
-                <label className="form-label">Name</label>
+                <label className="form-label">Name *</label>
                 <input required type="text" className="form-input" placeholder="Your Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Email</label>
+                <label className="form-label">Email *</label>
                 <input required type="email" className="form-input" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Message</label>
+                <label className="form-label">Mobile Number *</label>
+                <input required type="tel" className="form-input" placeholder="+91" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Message *</label>
                 <textarea required className="form-input" rows={5} placeholder="How can we help you?" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>Send Message</button>

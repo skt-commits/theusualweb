@@ -152,7 +152,7 @@ export default function Home() {
             </motion.h2>
           </div>
           
-          <div className="grid grid-cols-3">
+          <div className="horizontal-scroll">
             {newArrivals.map((product, index) => (
               <motion.div 
                 key={product.id} 

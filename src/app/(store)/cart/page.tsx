@@ -8,7 +8,7 @@ export default function Cart() {
   const { items, removeFromCart, totalPrice } = useCart();
 
   return (
-    <main style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
+    <main style={{ paddingTop: '140px', paddingBottom: '4rem' }}>
       <div className="container">
         <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Your <span className="text-gradient">Cart</span></h1>
         

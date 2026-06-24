@@ -87,7 +87,7 @@ function LoginContent() {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" required />
+              <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" required autoComplete="current-password" />
             </div>
             
             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
