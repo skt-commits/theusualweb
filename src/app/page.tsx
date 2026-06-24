@@ -1,65 +1,163 @@
-import Image from "next/image";
+'use client';
+
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import AddToCartButton from '@/components/AddToCartButton';
+
+const CATEGORIES = [
+  { id: 'womens', title: 'WOMEN', image: '/images/womens.png', link: '/category/womens' },
+  { id: 'mens', title: 'MEN', image: '/images/mens.png', link: '/category/mens' },
+  { id: 'kids', title: 'ACCESSORIES', image: '/images/girls.png', link: '/category/accessories' },
+];
+
+const NEW_ARRIVALS = [
+  { id: 'na1', name: "Pleated Long Dress", price: "₹ 1,799", image: "/images/womens.png" },
+  { id: 'na2', name: "Casual Denim Shirt", price: "₹ 1,499", image: "/images/mens.png" },
+  { id: 'na3', name: "Summer Floral Top", price: "₹ 1,199", image: "/images/girls.png" },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+      <div style={{ paddingTop: '80px' }}>
+        <div className="ticker-wrap">
+          <div className="ticker">
+            THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </div>
+
+      <section className="hero">
+        <div className="container">
+          <motion.div 
+            className="hero-content"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <motion.h1 
+              className="hero-title"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              TRENDY COLLECTION
+            </motion.h1>
+            <motion.p 
+              className="hero-desc"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+            >
+              Discover the latest styles tailored to fit every generation.
+            </motion.p>
+            <motion.div 
+              style={{ display: 'flex', gap: '1rem' }}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
+              <Link href="/category/new-arrivals" className="btn btn-white">EXPLORE &rarr;</Link>
+            </motion.div>
+          </motion.div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <motion.h2 
+            className="section-title"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+          >
+            CATEGORIES
+          </motion.h2>
+          
+          <div className="grid grid-cols-3">
+            {CATEGORIES.map((category, index) => (
+              <motion.div 
+                key={category.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+              >
+                <Link href={category.link}>
+                  <div className="category-card">
+                    <img src={category.image} alt={category.title} className="category-img" />
+                    <div className="category-overlay">
+                      <h3 className="category-title">{category.title}</h3>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" style={{ background: 'var(--accent)', padding: '4rem 0', textAlign: 'center', color: 'white', overflow: 'hidden' }}>
+        <motion.div 
+          className="container"
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        >
+          <h2 style={{ fontSize: '3rem', marginBottom: '1rem', color: 'white' }}>LIMITED TIME OFFER</h2>
+          <p style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--primary)' }}>Upto 50% Off on Selected Items</p>
+          <Link href="/category/offer-zone" className="btn btn-white">SHOP SALE &rarr;</Link>
+        </motion.div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+            <motion.h2 
+              className="section-title" 
+              style={{ marginBottom: 0 }}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              NEW ARRIVALS
+            </motion.h2>
+          </div>
+          
+          <div className="grid grid-cols-3">
+            {NEW_ARRIVALS.map((product, index) => (
+              <motion.div 
+                key={product.id} 
+                className="product-card"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+              >
+                <div className="product-img-wrapper">
+                  <Link href={`/product/${product.id}`}>
+                    <img src={product.image} alt={product.name} className="product-img" />
+                  </Link>
+                </div>
+                <div className="product-info">
+                  <Link href={`/product/${product.id}`}>
+                    <h4 className="product-name">{product.name}</h4>
+                  </Link>
+                  <span className="product-price">{product.price}</span>
+                  <div className="product-add" style={{ marginTop: '1rem' }}>
+                    <AddToCartButton product={product} fullWidth />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+    </main>
   );
 }
