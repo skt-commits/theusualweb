@@ -49,7 +49,7 @@ export default function Navbar() {
           <Link href="/contact" className="nav-link">Contact Us</Link>
         </div>
         
-        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           {isSearchOpen ? (
             <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--accent)', paddingBottom: '2px' }}>
               <input 
