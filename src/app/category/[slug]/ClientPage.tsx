@@ -11,13 +11,15 @@ const getProducts = (slug: string) => {
     'womens': "Women's Elegant Collection",
     'children': "Kids & Children Fashion",
     'new-arrivals': "Fresh New Arrivals",
+    'fabric': "Premium Fabrics Collection",
   };
 
   const images: Record<string, string> = {
     'mens': '/TheUsualsWeb/images/mens.png',
     'womens': '/TheUsualsWeb/images/womens.png',
-    'children': '/TheUsualsWeb/images/boys.png', 
-    'new-arrivals': '/TheUsualsWeb/images/girls.png',
+    'children': '/TheUsualsWeb/images/boys_vibrant.png', 
+    'new-arrivals': '/TheUsualsWeb/images/girls_vibrant.png',
+    'fabric': '/TheUsualsWeb/images/fabric_vibrant.png',
   };
 
   const baseTitle = titles[slug] || "Collection";

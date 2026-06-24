@@ -6,6 +6,7 @@ export function generateStaticParams() {
     { slug: 'womens' },
     { slug: 'children' },
     { slug: 'new-arrivals' },
+    { slug: 'fabric' },
     { slug: 'accessories' },
     { slug: 'offer-zone' },
     { slug: 'search' }
