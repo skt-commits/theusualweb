@@ -6,15 +6,15 @@ import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 
 const CATEGORIES = [
-  { id: 'womens', title: 'WOMEN', image: '/TheUsualsWeb/images/womens.png', link: '/category/womens' },
-  { id: 'mens', title: 'MEN', image: '/TheUsualsWeb/images/mens.png', link: '/category/mens' },
-  { id: 'kids', title: 'ACCESSORIES', image: '/TheUsualsWeb/images/girls.png', link: '/category/accessories' },
+  { id: 'girls', title: 'GIRLS FASHION', image: '/TheUsualsWeb/images/girls_vibrant.png', link: '/category/girls' },
+  { id: 'boys', title: 'BOYS FASHION', image: '/TheUsualsWeb/images/boys_vibrant.png', link: '/category/boys' },
+  { id: 'toddlers', title: 'TODDLERS & INFANTS', image: '/TheUsualsWeb/images/toddlers_vibrant.png', link: '/category/toddlers' },
 ];
 
 const NEW_ARRIVALS = [
-  { id: 'na1', name: "Pleated Long Dress", price: "₹ 1,799", image: "/TheUsualsWeb/images/womens.png" },
-  { id: 'na2', name: "Casual Denim Shirt", price: "₹ 1,499", image: "/TheUsualsWeb/images/mens.png" },
-  { id: 'na3', name: "Summer Floral Top", price: "₹ 1,199", image: "/TheUsualsWeb/images/girls.png" },
+  { id: 'na1', name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/TheUsualsWeb/images/girls_vibrant.png" },
+  { id: 'na2', name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/TheUsualsWeb/images/boys_vibrant.png" },
+  { id: 'na3', name: "Cozy Bear Onesie", price: "₹ 899", image: "/TheUsualsWeb/images/toddlers_vibrant.png" },
 ];
 
 export default function Home() {
@@ -23,7 +23,7 @@ export default function Home() {
       <div style={{ paddingTop: '80px' }}>
         <div className="ticker-wrap">
           <div className="ticker">
-            THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; TRENDY COLLECTION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF
+            THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF
           </div>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
-              TRENDY COLLECTION
+              KIDS FASHION
             </motion.h1>
             <motion.p 
               className="hero-desc"
@@ -50,7 +50,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              Discover the latest styles tailored to fit every generation.
+              Discover the most vibrant and playful styles tailored for kids of all ages.
             </motion.p>
             <motion.div 
               style={{ display: 'flex', gap: '1rem' }}
