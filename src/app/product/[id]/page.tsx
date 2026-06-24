@@ -17,9 +17,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             id.includes('womens') ? "Women's Elegant Signature" : 
             "Premium Quality Signature Collection Item",
       price: "₹ 1,499",
-      image: id.includes('girls') ? '/images/girls.png' : 
-             id.includes('womens') ? '/images/womens.png' : 
-             id.includes('mens') ? '/images/mens.png' : '/images/boys.png',
+      image: id.includes('girls') ? '/TheUsualsWeb/images/girls.png' : 
+             id.includes('womens') ? '/TheUsualsWeb/images/womens.png' : 
+             id.includes('mens') ? '/TheUsualsWeb/images/mens.png' : '/TheUsualsWeb/images/boys.png',
       description: "Experience the ultimate in comfort and style with our Premium Signature Collection. Crafted from the finest materials, this piece features a modern silhouette that seamlessly blends elegance with everyday wearability. Perfect for any occasion, its durable construction ensures it remains a staple in your wardrobe for seasons to come.",
       features: [
         "100% Premium Organic Cotton",

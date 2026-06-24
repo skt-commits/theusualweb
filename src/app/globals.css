@@ -154,7 +154,7 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 70vh;
   display: flex;
   align-items: center;
-  background: linear-gradient(rgba(197, 139, 141, 0.7), rgba(197, 139, 141, 0.8)), url('/images/hero-bg.png') center/cover no-repeat;
+  background: linear-gradient(rgba(197, 139, 141, 0.7), rgba(197, 139, 141, 0.8)), url('/TheUsualsWeb/images/hero-bg.png') center/cover no-repeat;
 }
 
 .hero-content {

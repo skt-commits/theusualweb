@@ -15,14 +15,14 @@ const getProducts = (slug: string) => {
   };
 
   const images: Record<string, string> = {
-    'mens': '/images/mens.png',
-    'womens': '/images/womens.png',
-    'children': '/images/boys.png', 
-    'new-arrivals': '/images/girls.png',
+    'mens': '/TheUsualsWeb/images/mens.png',
+    'womens': '/TheUsualsWeb/images/womens.png',
+    'children': '/TheUsualsWeb/images/boys.png', 
+    'new-arrivals': '/TheUsualsWeb/images/girls.png',
   };
 
   const baseTitle = titles[slug] || "Collection";
-  const baseImg = images[slug] || '/images/mens.png';
+  const baseImg = images[slug] || '/TheUsualsWeb/images/mens.png';
 
   return {
     title: baseTitle,

@@ -6,15 +6,15 @@ import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 
 const CATEGORIES = [
-  { id: 'womens', title: 'WOMEN', image: '/images/womens.png', link: '/category/womens' },
-  { id: 'mens', title: 'MEN', image: '/images/mens.png', link: '/category/mens' },
-  { id: 'kids', title: 'ACCESSORIES', image: '/images/girls.png', link: '/category/accessories' },
+  { id: 'womens', title: 'WOMEN', image: '/TheUsualsWeb/images/womens.png', link: '/category/womens' },
+  { id: 'mens', title: 'MEN', image: '/TheUsualsWeb/images/mens.png', link: '/category/mens' },
+  { id: 'kids', title: 'ACCESSORIES', image: '/TheUsualsWeb/images/girls.png', link: '/category/accessories' },
 ];
 
 const NEW_ARRIVALS = [
-  { id: 'na1', name: "Pleated Long Dress", price: "₹ 1,799", image: "/images/womens.png" },
-  { id: 'na2', name: "Casual Denim Shirt", price: "₹ 1,499", image: "/images/mens.png" },
-  { id: 'na3', name: "Summer Floral Top", price: "₹ 1,199", image: "/images/girls.png" },
+  { id: 'na1', name: "Pleated Long Dress", price: "₹ 1,799", image: "/TheUsualsWeb/images/womens.png" },
+  { id: 'na2', name: "Casual Denim Shirt", price: "₹ 1,499", image: "/TheUsualsWeb/images/mens.png" },
+  { id: 'na3', name: "Summer Floral Top", price: "₹ 1,199", image: "/TheUsualsWeb/images/girls.png" },
 ];
 
 export default function Home() {
