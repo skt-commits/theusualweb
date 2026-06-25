@@ -7,6 +7,13 @@ import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Script from 'next/script';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
@@ -47,43 +54,140 @@ export default function Checkout() {
     setLoading(true);
 
     try {
-      const docRef = await addDoc(collection(db, 'orders'), {
-        userId: user ? user.uid : 'guest',
-        userEmail: shippingInfo.email,
-        items: items,
-        totalAmount: totalPrice,
-        shippingInfo,
-        status: 'Processing',
-        paymentMethod: 'UPI / Net Banking',
-        transactionId: `MOCK_UPI_${Math.floor(Math.random() * 10000000)}`,
-        createdAt: new Date().toISOString()
+      // 1. Create order on server to get Razorpay order ID
+      const res = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalPrice })
       });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to initialize payment');
+      
+      const { order } = data;
 
-      // Send the real confirmation email using our new API route
-      try {
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: shippingInfo.email,
-            subject: 'Your Order from The Usuals is Confirmed!',
-            orderId: `...${docRef.id.slice(-8)}`,
-            totalAmount: totalPrice,
-            items: items
-          })
-        });
-      } catch (err) {
-        console.error("Failed to trigger email API:", err);
-      }
+      // 2. Open Razorpay modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '', // Needs to be exposed to client
+        amount: order.amount,
+        currency: order.currency,
+        name: 'The Usuals',
+        description: 'Order Payment',
+        order_id: order.id,
+        handler: async function (response: any) {
+          try {
+            // First save to Firebase to get a DocRef ID
+            const docRef = await addDoc(collection(db, 'orders'), {
+              userId: user ? user.uid : 'guest',
+              userEmail: shippingInfo.email,
+              items: items,
+              totalAmount: totalPrice,
+              shippingInfo,
+              status: 'Processing',
+              paymentMethod: 'Razorpay',
+              transactionId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              createdAt: new Date().toISOString()
+            });
 
-      setSuccess(true);
-      clearCart();
+            // Prepare Shiprocket payload
+            const shiprocketPayload = {
+              order_id: docRef.id,
+              order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+              pickup_location: 'Primary', // Must match your Shiprocket pickup location
+              billing_customer_name: shippingInfo.firstName,
+              billing_last_name: shippingInfo.lastName,
+              billing_address: shippingInfo.streetAddress,
+              billing_city: shippingInfo.city,
+              billing_pincode: shippingInfo.postalCode,
+              billing_state: shippingInfo.state,
+              billing_country: 'India',
+              billing_email: shippingInfo.email,
+              billing_phone: shippingInfo.phone,
+              shipping_is_billing: true,
+              order_items: items.map(item => ({
+                name: item.name,
+                sku: item.id || 'SKU',
+                units: item.quantity,
+                selling_price: item.price
+              })),
+              payment_method: 'Prepaid',
+              sub_total: totalPrice,
+              length: 10,
+              breadth: 10,
+              height: 10,
+              weight: 0.5
+            };
+
+            // 3. Verify Payment and Push to Shiprocket
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderDetails: shiprocketPayload
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            
+            if (!verifyRes.ok) {
+              console.error('Payment Verification Failed', verifyData);
+              alert('Payment verification failed. Please contact support.');
+              return;
+            }
+
+            // Send confirmation email
+            try {
+              await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  to: shippingInfo.email,
+                  subject: 'Your Order from The Usuals is Confirmed!',
+                  orderId: docRef.id,
+                  totalAmount: totalPrice,
+                  items: items
+                })
+              });
+            } catch (err) {
+              console.error("Failed to trigger email API:", err);
+            }
+
+            setSuccess(true);
+            clearCart();
+          } catch (err) {
+            console.error("Error finalizing order:", err);
+            alert("Payment successful but failed to save order. Please contact support.");
+          } finally {
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+          email: shippingInfo.email,
+          contact: shippingInfo.phone
+        },
+        theme: {
+          color: '#3b82f6'
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.on('payment.failed', function (response: any) {
+        alert(response.error.description);
+        setLoading(false);
+      });
+      
+      rzp1.open();
+
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Failed to place order.");
+      console.error("Error starting checkout:", error);
+      alert("Failed to initialize payment.");
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   if (success) {
@@ -141,6 +245,7 @@ export default function Checkout() {
 
   return (
     <main style={{ paddingTop: '140px', paddingBottom: '4rem' }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="container">
         <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Secure <span className="text-gradient">Checkout</span></h1>
         
@@ -196,10 +301,10 @@ export default function Checkout() {
             <div className="glass-panel" style={{ padding: '2rem' }}>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Payment Method</h3>
               <div style={{ padding: '1.5rem', background: 'white', borderRadius: '8px', border: '1px solid var(--accent)', marginBottom: '1rem' }}>
-                <input type="radio" id="upi" name="payment" defaultChecked style={{ marginRight: '10px' }} />
-                <label htmlFor="upi" style={{ fontWeight: 'bold' }}>UPI / Net Banking (Razorpay Mock)</label>
+                <input type="radio" id="razorpay" name="payment" defaultChecked style={{ marginRight: '10px' }} />
+                <label htmlFor="razorpay" style={{ fontWeight: 'bold' }}>Razorpay (UPI / Cards / Net Banking)</label>
                 <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-                  A mock UPI Transaction ID will be generated for testing. 
+                  Secure payment via Razorpay. You will be redirected to complete your payment.
                 </div>
               </div>
             </div>
