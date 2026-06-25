@@ -94,7 +94,7 @@ export default function Checkout() {
             const shiprocketPayload = {
               order_id: docRef.id,
               order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-              pickup_location: 'Primary', // Must match your Shiprocket pickup location
+              pickup_location: 'warehouse', // Adjusted to match user's Shiprocket pickup location
               billing_customer_name: shippingInfo.firstName,
               billing_last_name: shippingInfo.lastName,
               billing_address: shippingInfo.streetAddress,
@@ -149,7 +149,11 @@ export default function Checkout() {
                   subject: 'Your Order from The Usuals is Confirmed!',
                   orderId: docRef.id,
                   totalAmount: totalPrice,
-                  items: items
+                  items: items,
+                  paymentMethod: 'Razorpay (Paid)',
+                  transactionId: response.razorpay_payment_id,
+                  paymentDate: new Date().toLocaleDateString('en-IN'),
+                  paymentTime: new Date().toLocaleTimeString('en-IN')
                 })
               });
             } catch (err) {

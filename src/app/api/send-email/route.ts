@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { to, subject, orderId, totalAmount, items } = body;
+    const { to, subject, orderId, totalAmount, items, paymentMethod, transactionId, paymentDate, paymentTime } = body;
 
     // You need to configure environment variables for this to work
     const userEmail = process.env.EMAIL_USER;
@@ -26,7 +26,13 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
     const itemsHtml = items.map((item: any) => {
-      const imageUrl = item.image.startsWith('http') ? item.image : `${baseUrl}${item.image}`;
+      let imageUrl = item.image?.startsWith('http') ? item.image : `${baseUrl}${item.image}`;
+      // Email clients (like Gmail) block localhost image requests. 
+      // If testing locally, fallback to a public placeholder so the layout doesn't break.
+      if (imageUrl.includes('localhost')) {
+        imageUrl = 'https://placehold.co/60x60/e2e8f0/475569?text=Product';
+      }
+
       return `
       <li style="margin-bottom: 15px; display: table; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 15px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -64,7 +70,25 @@ export async function POST(req: Request) {
             <p style="margin: 10px 0 0; color: #555;">Order ID: <strong>${orderId}</strong></p>
           </div>
           
-          <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 20px;">Order Summary</h3>
+          <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 20px;">Payment Details</h3>
+          <div style="background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 30px; font-size: 0.95rem; color: #555;">
+            <table width="100%" cellpadding="5" cellspacing="0" border="0">
+              <tr>
+                <td style="color: #888; width: 40%;">Payment Method:</td>
+                <td style="font-weight: bold; color: #333; text-align: right;">${paymentMethod || 'Prepaid'}</td>
+              </tr>
+              <tr>
+                <td style="color: #888;">Transaction ID:</td>
+                <td style="font-weight: bold; color: #333; text-align: right;">${transactionId || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="color: #888;">Date & Time:</td>
+                <td style="font-weight: bold; color: #333; text-align: right;">${paymentDate || ''} at ${paymentTime || ''}</td>
+              </tr>
+            </table>
+          </div>
+
+          <h3 style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Order Summary</h3>
           <ul style="list-style: none; padding: 0; margin: 0;">${itemsHtml}</ul>
           
           <div style="background: #fafafa; padding: 15px 20px; border-radius: 8px; margin-top: 20px; text-align: right;">
