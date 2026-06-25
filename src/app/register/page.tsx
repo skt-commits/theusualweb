@@ -6,6 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function RegisterContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ function RegisterContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -87,9 +89,24 @@ function RegisterContent() {
       return setError('Passwords do not match');
     }
 
+    if (!recaptchaToken) {
+      return setError('Please complete the reCAPTCHA verification');
+    }
+
     setLoading(true);
 
     try {
+      const recaptchaRes = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: recaptchaToken })
+      });
+      const recaptchaData = await recaptchaRes.json();
+      
+      if (!recaptchaData.success) {
+        throw new Error('reCAPTCHA verification failed. Please try again.');
+      }
+
       let uid = formData.googleUid;
       let finalEmail = formData.email;
 
@@ -269,8 +286,15 @@ function RegisterContent() {
                 </div>
               </>
             )}
+            
+            <div style={{ margin: '1.5rem 0', display: 'flex', justifyContent: 'center' }}>
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+                onChange={(token) => setRecaptchaToken(token)}
+              />
+            </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', padding: '1rem' }} disabled={loading}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '1rem' }} disabled={loading}>
               {loading ? 'Creating Account...' : 'Complete Registration'}
             </button>
           </form>

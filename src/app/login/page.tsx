@@ -6,6 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function LoginContent() {
   const router = useRouter();
@@ -18,6 +19,7 @@ function LoginContent() {
     password: ''
   });
   const [error, setError] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,15 +27,32 @@ function LoginContent() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!recaptchaToken) {
+      setError('Please complete the reCAPTCHA verification');
+      return;
+    }
+    
     setLoading(true);
     setError('');
 
     try {
+      const recaptchaRes = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: recaptchaToken })
+      });
+      const recaptchaData = await recaptchaRes.json();
+      
+      if (!recaptchaData.success) {
+        throw new Error('reCAPTCHA verification failed. Please try again.');
+      }
+
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       router.push(redirectUrl); // Redirect to original page
     } catch (err: any) {
       console.error(err);
-      setError('Invalid email or password');
+      setError(err.message === 'reCAPTCHA verification failed. Please try again.' ? err.message : 'Invalid email or password');
     }
 
     setLoading(false);
@@ -90,7 +109,14 @@ function LoginContent() {
               <input type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" required autoComplete="current-password" />
             </div>
             
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
+            <div style={{ margin: '1.5rem 0', display: 'flex', justifyContent: 'center' }}>
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+                onChange={(token) => setRecaptchaToken(token)}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }} disabled={loading}>
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>

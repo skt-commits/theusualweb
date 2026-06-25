@@ -3,15 +3,30 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [status, setStatus] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!recaptchaToken) {
+      return setStatus('Please complete the reCAPTCHA');
+    }
     setStatus('Sending...');
     try {
+      const recaptchaRes = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: recaptchaToken })
+      });
+      const recaptchaData = await recaptchaRes.json();
+      
+      if (!recaptchaData.success) {
+        throw new Error('reCAPTCHA verification failed. Please try again.');
+      }
       await addDoc(collection(db, 'messages'), {
         ...formData,
         status: 'unread',
@@ -19,9 +34,9 @@ export default function ContactPage() {
       });
       setStatus('Message sent successfully!');
       setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setStatus('Failed to send message.');
+      setStatus(error.message === 'reCAPTCHA verification failed. Please try again.' ? error.message : 'Failed to send message.');
     }
   };
 
@@ -54,8 +69,16 @@ export default function ContactPage() {
                 <label className="form-label">Message *</label>
                 <textarea required className="form-input" rows={5} placeholder="How can we help you?" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}></textarea>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>Send Message</button>
-              {status && <p style={{ color: status.includes('success') ? '#22c55e' : '#ef4444', textAlign: 'center', fontWeight: 'bold' }}>{status}</p>}
+
+              <div style={{ margin: '1.5rem 0', display: 'flex', justifyContent: 'center' }}>
+                <ReCAPTCHA
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+                  onChange={(token) => setRecaptchaToken(token)}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }} disabled={status === 'Sending...'}>Send Message</button>
+              {status && <p style={{ color: (status.includes('success') || status === 'Sending...') ? '#22c55e' : '#ef4444', textAlign: 'center', fontWeight: 'bold' }}>{status}</p>}
             </form>
           </div>
           <div>
