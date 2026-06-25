@@ -5,6 +5,18 @@ import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { X } from 'lucide-react';
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Processing': return '#f59e0b'; // Amber
+    case 'Order Received': return '#3b82f6'; // Blue
+    case 'Shipped': return '#8b5cf6'; // Purple
+    case 'On the way': return '#06b6d4'; // Cyan
+    case 'Delivered': return '#22c55e'; // Green
+    case 'Cancelled': return '#ef4444'; // Red
+    default: return 'var(--secondary)';
+  }
+};
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +179,7 @@ export default function AdminOrders() {
               <h2 style={{ fontSize: '1.8rem', color: 'var(--primary)' }}>Order Details</h2>
               <span style={{ 
                 padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.85rem',
-                background: 'var(--secondary)', color: 'white', fontWeight: 'bold'
+                background: getStatusColor(selectedOrder.status || 'Processing'), color: 'white', fontWeight: 'bold'
               }}>
                 {selectedOrder.status || 'Processing'}
               </span>

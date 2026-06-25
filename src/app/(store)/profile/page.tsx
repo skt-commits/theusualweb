@@ -7,6 +7,18 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { Edit2, Save, X } from 'lucide-react';
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Processing': return '#f59e0b'; // Amber
+    case 'Order Received': return '#3b82f6'; // Blue
+    case 'Shipped': return '#8b5cf6'; // Purple
+    case 'On the way': return '#06b6d4'; // Cyan
+    case 'Delivered': return '#22c55e'; // Green
+    case 'Cancelled': return '#ef4444'; // Red
+    default: return 'var(--secondary)';
+  }
+};
+
 export default function UserProfile() {
   const { user, userData, loading } = useAuth();
   const router = useRouter();
@@ -229,7 +241,7 @@ export default function UserProfile() {
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ 
                             padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.85rem',
-                            background: order.status === 'Delivered' ? '#22c55e' : 'var(--secondary)', 
+                            background: getStatusColor(order.status || 'Processing'), 
                             color: 'white', fontWeight: 'bold'
                           }}>
                             {order.status || 'Processing'}
