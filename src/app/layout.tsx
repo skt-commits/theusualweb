@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import './forms.css';
 import Navbar from '@/components/Navbar';
@@ -9,6 +9,13 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'The Usuals - Premium Fashion for Everyone',
   description: 'Shop the latest collections of Boys, Girls, Mens, and Womens fashion at The Usuals.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

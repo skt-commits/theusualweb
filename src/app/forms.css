@@ -22,4 +22,8 @@
 
 @media (max-width: 768px) {
   .checkout-grid, .contact-grid, .profile-grid { grid-template-columns: 1fr; }
+  .cart-summary { padding: 1.5rem; }
+  .cart-item { padding: 1rem; flex-direction: column; align-items: stretch; }
+  .cart-item img { width: 80px; height: 100px; }
+  .auth-card { padding: 2rem 1.5rem; margin: 2rem auto; }
 }
