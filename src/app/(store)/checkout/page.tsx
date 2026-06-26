@@ -47,7 +47,11 @@ export default function Checkout() {
         setCalculatingShipping(true);
         try {
           const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0) || 1;
-          const res = await fetch(`/api/shiprocket/shipping?pincode=${shippingInfo.postalCode}&weight=${totalWeight}`);
+          const res = await fetch(`/api/shiprocket/shipping`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pincode: shippingInfo.postalCode, weight: totalWeight })
+          });
           if (res.ok) {
             const data = await res.json();
             setShippingCost(data.rate);
