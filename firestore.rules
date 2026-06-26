@@ -61,5 +61,15 @@ service cloud.firestore {
       allow create: if true; // Anyone can submit a contact form message
       allow read, update, delete: if isAdmin(); // Only admins can read/manage messages
     }
+    
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
 }
