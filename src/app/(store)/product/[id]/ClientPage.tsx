@@ -17,14 +17,15 @@ export default function ClientPage({ id }: { id: string }) {
     { id: 2, author: "Rahul M.", rating: 4, text: "Great product for the price. The color is exactly as shown in the pictures." }
   ]);
 
-  const [size, setSize] = useState('M');
+  const [size, setSize] = useState('');
+  const [showSizeChart, setShowSizeChart] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         // Handle IDs coming from Cart which might have size suffixes (e.g. productID-M)
         let actualId = id;
-        const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+        const sizes = ['S', 'M', 'L', 'XL', 'XXL', '18-24 Month', '2-3 Years', '3-4 Years', '4-5 Years', '5-6 Years', '6-7 Years', '10m', '20m', '30m', '40m', '50m', '60m', '70m', '80m', '90m', '100m'];
         for (const s of sizes) {
           if (id.endsWith(`-${s}`)) {
             actualId = id.substring(0, id.length - s.length - 1);
@@ -37,22 +38,27 @@ export default function ClientPage({ id }: { id: string }) {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setProduct({ id: docSnap.id, ...data });
-          // Set initial active image from array or fallback to single image
           setActiveImage(data.images && data.images.length > 0 ? data.images[0] : data.image);
+          if (data.sizes && data.sizes.length > 0) {
+            setSize(data.sizes[0]);
+          }
         } else {
           // Handle Fallback Mock Products from Home Page
           if (actualId === 'na1') {
-            const fakeData = { id: actualId, name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/images/girls_vibrant.png", description: "A beautifully crafted dress for your little princess.", category: "girls" };
+            const fakeData = { id: actualId, name: "Sparkle Princess Dress", price: "₹ 1,299", image: "/images/girls_vibrant.png", description: "A beautifully crafted dress for your little princess.", category: "girls", sizes: ['18-24 Month', '2-3 Years', '3-4 Years'] };
             setProduct(fakeData);
             setActiveImage(fakeData.image);
+            setSize('18-24 Month');
           } else if (actualId === 'na2') {
-            const fakeData = { id: actualId, name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/images/boys_vibrant.png", description: "Keep them warm and stylish with this modern jacket.", category: "boys" };
+            const fakeData = { id: actualId, name: "Urban Streetwear Jacket", price: "₹ 1,499", image: "/images/boys_vibrant.png", description: "Keep them warm and stylish with this modern jacket.", category: "boys", sizes: ['4-5 Years', '5-6 Years'] };
             setProduct(fakeData);
             setActiveImage(fakeData.image);
+            setSize('4-5 Years');
           } else if (actualId === 'na3') {
-            const fakeData = { id: actualId, name: "Cozy Bear Onesie", price: "₹ 899", image: "/images/toddlers_vibrant.png", description: "The softest, most adorable onesie for your toddler.", category: "toddlers" };
+            const fakeData = { id: actualId, name: "Cozy Bear Onesie", price: "₹ 899", image: "/images/toddlers_vibrant.png", description: "The softest, most adorable onesie for your toddler.", category: "toddlers", sizes: ['18-24 Month'] };
             setProduct(fakeData);
             setActiveImage(fakeData.image);
+            setSize('18-24 Month');
           } else {
             console.error("No such product!");
           }
@@ -80,6 +86,7 @@ export default function ClientPage({ id }: { id: string }) {
   if (!product) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Product not found.</div>;
 
   const allImages = product.images || (product.image ? [product.image] : []);
+  const isKidsFashion = product.category === 'boys' || product.category === 'girls';
 
   return (
     <main style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
@@ -133,7 +140,24 @@ export default function ClientPage({ id }: { id: string }) {
               <span style={{ color: 'var(--foreground)', marginLeft: '0.5rem' }}>({reviews.length} reviews)</span>
             </div>
             
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>{product.price}</p>
+            {product.category === 'fabric' ? (
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--primary)' }}>
+                {size && product.sizePrices && product.sizePrices[size] 
+                  ? product.sizePrices[size] 
+                  : (product.sizePrices && Object.values(product.sizePrices).length > 0 
+                      ? `From ${Object.values(product.sizePrices)[0]}` 
+                      : 'Price on Selection')}
+              </p>
+            ) : (
+              product.offerPrice ? (
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '2rem' }}>
+                  <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{product.offerPrice}</p>
+                  <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{product.price}</p>
+                </div>
+              ) : (
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>{product.price}</p>
+              )
+            )}
             
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>About this product</h3>
@@ -153,24 +177,43 @@ export default function ClientPage({ id }: { id: string }) {
             </ul>
             
             <div style={{ marginBottom: '2.5rem' }}>
-              <h4 style={{ fontWeight: 'bold', marginBottom: '0.8rem' }}>Select Size:</h4>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {['S', 'M', 'L', 'XL', 'XXL'].map(sz => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                <h4 style={{ fontWeight: 'bold', margin: 0 }}>Select Size:</h4>
+                {isKidsFashion && (
                   <button 
-                    key={sz}
-                    onClick={() => setSize(sz)}
-                    style={{ 
-                      width: '45px', height: '45px', borderRadius: '8px', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: size === sz ? '2px solid var(--accent)' : '1px solid var(--border-color)',
-                      background: size === sz ? 'var(--accent)' : 'white',
-                      color: size === sz ? 'white' : 'var(--foreground)',
-                      fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
+                    onClick={() => setShowSizeChart(true)} 
+                    style={{ background: 'none', border: 'none', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9rem' }}
                   >
-                    {sz}
+                    Explore your sizes here..
                   </button>
-                ))}
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                {(product.allSizes || (product.sizes && product.sizes.length ? Array.from(new Set(['S', 'M', 'L', 'XL', 'XXL', ...product.sizes])) : ['S', 'M', 'L', 'XL', 'XXL'])).map((sz: string) => {
+                  const isAvailable = product.sizes ? product.sizes.includes(sz) : true;
+                  return (
+                    <div key={sz} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
+                      <button 
+                        disabled={!isAvailable}
+                        onClick={() => setSize(sz)}
+                        style={{ 
+                          minWidth: '45px', height: '45px', borderRadius: '8px', padding: '0 0.5rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: size === sz ? '2px solid var(--accent)' : '1px solid var(--border-color)',
+                          background: !isAvailable ? '#f3f4f6' : (size === sz ? 'var(--accent)' : 'white'),
+                          color: !isAvailable ? '#9ca3af' : (size === sz ? 'white' : 'var(--foreground)'),
+                          fontWeight: 'bold', 
+                          cursor: isAvailable ? 'pointer' : 'not-allowed', 
+                          transition: 'all 0.2s',
+                          opacity: !isAvailable ? 0.6 : 1
+                        }}
+                      >
+                        {sz}
+                      </button>
+                      {!isAvailable && <span style={{ fontSize: '0.65rem', color: '#ef4444', textAlign: 'center', whiteSpace: 'nowrap' }}>No stocks left</span>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             
@@ -221,6 +264,76 @@ export default function ClientPage({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      
+      {showSizeChart && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="glass-panel" style={{ background: 'white', padding: '2rem', width: '95%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', borderRadius: '16px' }}>
+            <button onClick={() => setShowSizeChart(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: '#f3f4f6', border: 'none', width: '32px', height: '32px', borderRadius: '50%', fontSize: '1.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>&times;</button>
+            
+            <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', color: '#333' }}>Sets & Suits Size Chart</h2>
+            
+            <div style={{ overflowX: 'auto' }}>
+              <h3 style={{ marginTop: '1.5rem', marginBottom: '0.8rem', textAlign: 'center', color: '#444' }}>Size Chart In Inch</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #ccc', textAlign: 'center', color: '#333' }}>
+                <thead style={{ background: '#f9fafb' }}>
+                  <tr>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>Age Group</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>18-24 Month</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>2-3 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>3-4 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>4-5 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>5-6 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>6-7 Years</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Shoulder', '10.2', '10.6', '11.0', '11.4', '11.8', '12.6'],
+                    ['Sleeve Length', '15.1', '15.3', '15.5', '15.7', '15.9', '17.3'],
+                    ['Half Chest', '11.4', '11.8', '12.2', '12.6', '13.0', '13.8'],
+                    ['Total Length', '15.0', '16.1', '16.9', '17.7', '18.5', '19.7'],
+                    ['Half Waist', '8.5', '9.1', '9.4', '9.8', '10.2', '10.2'],
+                    ['Bottom Length', '20.1', '21.7', '23.2', '24.8', '26.0', '28.3']
+                  ].map(row => (
+                    <tr key={row[0]}>
+                      {row.map((cell, i) => <td key={i} style={{ border: '1px solid #ccc', padding: '10px', fontWeight: i === 0 ? 'bold' : 'normal' }}>{cell}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <h3 style={{ marginTop: '2.5rem', marginBottom: '0.8rem', textAlign: 'center', color: '#444' }}>Size Chart In CM</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '2px solid #ccc', textAlign: 'center', color: '#333' }}>
+                <thead style={{ background: '#f9fafb' }}>
+                  <tr>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>Age Group</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>18-24 Month</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>2-3 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>3-4 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>4-5 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>5-6 Years</th>
+                    <th style={{ border: '1px solid #ccc', padding: '10px' }}>6-7 Years</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['Shoulder', '25.0', '26.0', '27.0', '28.0', '30.0', '32.0'],
+                    ['Sleeve Length', '30.0', '32.0', '34.0', '36.0', '40.0', '44.0'],
+                    ['Half Chest', '33.0', '34.0', '35.0', '36.0', '33.0', '35.0'],
+                    ['Total Length', '37.0', '41.0', '43.0', '45.0', '48.0', '50.0'],
+                    ['Half Waist', '21.0', '22.0', '23.0', '24.0', '25.0', '26.0'],
+                    ['Bottom Length', '51.0', '55.0', '59.0', '63.0', '65.0', '72.0']
+                  ].map(row => (
+                    <tr key={row[0]}>
+                      {row.map((cell, i) => <td key={i} style={{ border: '1px solid #ccc', padding: '10px', fontWeight: i === 0 ? 'bold' : 'normal' }}>{cell}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
       
       <style dangerouslySetInnerHTML={{__html: `
         @media (max-width: 768px) {

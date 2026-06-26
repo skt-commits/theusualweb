@@ -1,25 +1,32 @@
-export default function PrivacyPage() {
+export default function PrivacyPolicy() {
   return (
-    <main style={{ paddingBottom: '4rem' }}>
-      <div className="page-header">
-        <div className="container">
-          <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Privacy Policy</h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.2rem' }}>How we protect and handle your data.</p>
-        </div>
-      </div>
-      <div className="container" style={{ maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
-        <div className="glass-panel" style={{ padding: '3rem' }}>
-          <p style={{ color: 'var(--foreground)', marginBottom: '2rem' }}>Last Updated: June 24, 2026</p>
-          
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>1. Information We Collect</h2>
-          <p style={{ marginBottom: '1.5rem' }}>We collect information you provide directly to us, such as when you create or modify your account, request on-demand services, contact customer support, or otherwise communicate with us. This information may include: name, email, phone number, postal address, profile picture, payment method, items requested (for delivery services), delivery notes, and other information you choose to provide.</p>
+    <main className="container" style={{ paddingTop: '140px', paddingBottom: '4rem', maxWidth: '800px' }}>
+      <h1 className="text-gradient" style={{ fontSize: 'clamp(2rem, 5vw, 2.5rem)', marginBottom: '2rem' }}>Privacy Policy</h1>
+      
+      <div className="glass-panel" style={{ padding: 'clamp(1.2rem, 4vw, 2rem)', lineHeight: '1.6', color: 'var(--foreground)' }}>
+        <p><strong>Last updated: October 7, 2024</strong></p>
+        <p>This Privacy Policy describes how The Usuals (the "Site", "we", "us", or "our") collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from our website (the "Site") or otherwise communicate with us regarding the Site (collectively, the "Services").</p>
+        
+        <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1a1a2e' }}>Changes to This Privacy Policy</h2>
+        <p>We may update this Privacy Policy from time to time, including to reflect changes to our practices or for other operational, legal, or regulatory reasons. We will post the revised Privacy Policy on the Site, update the "Last updated" date and take any other steps required by applicable law.</p>
 
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>2. How We Use Information</h2>
-          <p style={{ marginBottom: '1.5rem' }}>We may use the information we collect about you to provide, maintain, and improve our services, including, for example, to facilitate payments, send receipts, provide products and services you request (and send related information), develop new features, provide customer support to Users and Drivers, develop safety features, authenticate users, and send product updates and administrative messages.</p>
+        <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1a1a2e' }}>How We Collect and Use Your Personal Information</h2>
+        <p>To provide the Services, we collect personal information about you from a variety of sources. The information that we collect and use varies depending on how you interact with us.</p>
+        <ul>
+          <li><strong>Contact details:</strong> including your name, address, phone number, and email.</li>
+          <li><strong>Order information:</strong> including your name, billing address, shipping address, payment confirmation, email address, and phone number.</li>
+          <li><strong>Account information:</strong> including your username, password, security questions and other information used for account security purposes.</li>
+          <li><strong>Customer support information:</strong> including the information you choose to include in communications with us.</li>
+        </ul>
 
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>3. Sharing of Information</h2>
-          <p>We may share the information we collect about you as described in this Statement or as described at the time of collection or sharing, including as follows: with third party service providers who need access to such information to carry out work on our behalf.</p>
-        </div>
+        <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1a1a2e' }}>Cookies</h2>
+        <p>Like many websites, we use Cookies on our Site. We use Cookies to power and improve our Site and our Services (including to remember your actions and preferences), to run analytics and better understand user interaction with the Services.</p>
+
+        <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1a1a2e' }}>Security and Retention of Your Information</h2>
+        <p>Please be aware that no security measures are perfect or impenetrable, and we cannot guarantee "perfect security." In addition, any information you send to us may not be secure while in transit. We recommend that you do not use insecure channels to communicate sensitive or confidential information to us.</p>
+
+        <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1a1a2e' }}>Contact Us</h2>
+        <p>Should you have any questions about our privacy practices or this Privacy Policy, please email us at <strong>theusualsalem@gmail.com</strong>.</p>
       </div>
     </main>
   );

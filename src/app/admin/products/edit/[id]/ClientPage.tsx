@@ -15,11 +15,42 @@ export default function ClientPage({ id }: { id: string }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   
+  const getStandardSizes = (category: string) => {
+    if (category === 'boys' || category === 'girls') {
+      return ['18-24 Month', '2-3 Years', '3-4 Years', '4-5 Years', '5-6 Years', '6-7 Years'];
+    }
+    if (category === 'fabric') {
+      return ['10m', '20m', '30m', '40m', '50m', '60m', '70m', '80m', '90m', '100m'];
+    }
+    return ['S', 'M', 'L', 'XL', 'XXL'];
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'boys'
+    offerPrice: '',
+    description: '',
+    category: 'boys',
+    sizes: getStandardSizes('boys')
   });
+
+  const [allSizes, setAllSizes] = useState<string[]>(getStandardSizes('boys'));
+  const [customSize, setCustomSize] = useState('');
+  const [sizePrices, setSizePrices] = useState<Record<string, string>>({});
+
+  const handleSizePriceChange = (size: string, price: string) => {
+    setSizePrices(prev => ({ ...prev, [size]: price }));
+  };
+
+  const handleAddCustomSize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const trimmed = customSize.trim();
+    if (trimmed && !allSizes.includes(trimmed)) {
+      setAllSizes([...allSizes, trimmed]);
+      setFormData(prev => ({ ...prev, sizes: [...prev.sizes, trimmed] }));
+      setCustomSize('');
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,11 +59,23 @@ export default function ClientPage({ id }: { id: string }) {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          const standardSizesForCategory = getStandardSizes(data.category);
           setFormData({
             name: data.name,
-            price: data.price.replace('₹ ', ''),
-            category: data.category
+            price: data.price ? data.price.replace('₹ ', '') : '',
+            offerPrice: data.offerPrice ? data.offerPrice.replace('₹ ', '') : '',
+            description: data.description || '',
+            category: data.category,
+            sizes: data.sizes || standardSizesForCategory
           });
+          
+          let fetchedAllSizes = data.allSizes;
+          if (!fetchedAllSizes) {
+            const currentSizes = data.sizes || [];
+            fetchedAllSizes = Array.from(new Set([...standardSizesForCategory, ...currentSizes]));
+          }
+          setAllSizes(fetchedAllSizes);
+          setSizePrices(data.sizePrices || {});
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -42,8 +85,33 @@ export default function ClientPage({ id }: { id: string }) {
     fetchProduct();
   }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === 'category') {
+      const oldStandard = getStandardSizes(formData.category);
+      const newStandard = getStandardSizes(value);
+      
+      const customAdded = allSizes.filter(s => !oldStandard.includes(s));
+      const customSelected = formData.sizes.filter(s => !oldStandard.includes(s));
+      
+      setAllSizes([...newStandard, ...customAdded]);
+      setFormData(prev => ({ 
+        ...prev, 
+        category: value, 
+        sizes: [...newStandard, ...customSelected] 
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSizeToggle = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size) 
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,15 +131,29 @@ export default function ClientPage({ id }: { id: string }) {
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.price) {
+      if (!formData.name || (formData.category !== 'fabric' && !formData.price)) {
         alert("Please fill all required fields.");
         setLoading(false);
         return;
       }
 
+      const normalizedSizePrices: Record<string, string> = {};
+      if (formData.category === 'fabric') {
+        Object.entries(sizePrices).forEach(([sz, p]) => {
+          if (p.trim()) {
+            normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
+          }
+        });
+      }
+
       let updateData: any = {
         name: formData.name,
-        price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
+        price: formData.category !== 'fabric' ? (formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`) : '',
+        offerPrice: formData.category !== 'fabric' && formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
+        description: formData.description,
+        sizes: formData.sizes,
+        allSizes: allSizes,
+        sizePrices: normalizedSizePrices,
         category: formData.category,
         updatedAt: new Date().toISOString()
       };
@@ -146,8 +228,70 @@ export default function ClientPage({ id }: { id: string }) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Price</label>
-          <input type="text" name="price" value={formData.price} onChange={handleChange} className="form-input" required />
+          <label className="form-label">Product Description</label>
+          <textarea 
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="form-input" 
+            placeholder="Experience the ultimate in comfort and style..." 
+            rows={4}
+            required
+          />
+        </div>
+
+        {formData.category !== 'fabric' && (
+          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label">Actual Price</label>
+              <input type="text" name="price" value={formData.price} onChange={handleChange} className="form-input" required />
+            </div>
+            <div>
+              <label className="form-label">Offer Price (Optional)</label>
+              <input type="text" name="offerPrice" value={formData.offerPrice} onChange={handleChange} className="form-input" />
+            </div>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label">Available Sizes</label>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.5rem', marginBottom: '1rem' }}>
+            {allSizes.map(sz => (
+              <div key={sz} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={formData.sizes.includes(sz)} 
+                    onChange={() => handleSizeToggle(sz)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  {sz}
+                </label>
+                {formData.category === 'fabric' && formData.sizes.includes(sz) && (
+                  <input 
+                    type="text" 
+                    value={sizePrices[sz] || ''}
+                    onChange={(e) => handleSizePriceChange(sz, e.target.value)}
+                    placeholder="Price ₹"
+                    className="form-input"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.9rem', width: '80px', height: '30px' }}
+                    required
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <input 
+              type="text" 
+              value={customSize}
+              onChange={(e) => setCustomSize(e.target.value)}
+              className="form-input" 
+              placeholder="Add custom size (e.g. 32, 6 Months)" 
+              style={{ maxWidth: '300px' }}
+            />
+            <button onClick={handleAddCustomSize} className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>+</button>
+          </div>
         </div>
 
         <div className="form-group">

@@ -54,11 +54,15 @@ export default function Checkout() {
     setLoading(true);
 
     try {
+      const sgstAmount = Math.round(totalPrice * 0.025);
+      const cgstAmount = Math.round(totalPrice * 0.025);
+      const finalTotalAmount = totalPrice + sgstAmount + cgstAmount;
+
       // 1. Create order on server to get Razorpay order ID
       const res = await fetch('/api/payment/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: totalPrice })
+        body: JSON.stringify({ amount: finalTotalAmount })
       });
       const data = await res.json();
       
@@ -76,12 +80,14 @@ export default function Checkout() {
         order_id: order.id,
         handler: async function (response: any) {
           try {
-            // First save to Firebase to get a DocRef ID
             const docRef = await addDoc(collection(db, 'orders'), {
               userId: user ? user.uid : 'guest',
               userEmail: shippingInfo.email,
               items: items,
-              totalAmount: totalPrice,
+              subtotal: totalPrice,
+              sgst: sgstAmount,
+              cgst: cgstAmount,
+              totalAmount: finalTotalAmount,
               shippingInfo,
               status: 'Processing',
               paymentMethod: 'Razorpay',
@@ -112,7 +118,7 @@ export default function Checkout() {
                 selling_price: item.price
               })),
               payment_method: 'Prepaid',
-              sub_total: totalPrice,
+              sub_total: finalTotalAmount,
               length: 10,
               breadth: 10,
               height: 10,
@@ -148,7 +154,7 @@ export default function Checkout() {
                   to: shippingInfo.email,
                   subject: 'Your Order from The Usuals is Confirmed!',
                   orderId: docRef.id,
-                  totalAmount: totalPrice,
+                  totalAmount: finalTotalAmount,
                   items: items,
                   paymentMethod: 'Razorpay (Paid)',
                   transactionId: response.razorpay_payment_id,
@@ -333,13 +339,21 @@ export default function Checkout() {
                 <span>Subtotal</span>
                 <span>₹ {totalPrice.toLocaleString()}</span>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                <span>SGST (2.5%)</span>
+                <span>₹ {Math.round(totalPrice * 0.025).toLocaleString()}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                <span>CGST (2.5%)</span>
+                <span>₹ {Math.round(totalPrice * 0.025).toLocaleString()}</span>
+              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <span>Shipping</span>
                 <span style={{ color: '#22c55e' }}>Free</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
                 <span>Total</span>
-                <span className="text-gradient">₹ {totalPrice.toLocaleString()}</span>
+                <span className="text-gradient">₹ {(totalPrice + Math.round(totalPrice * 0.025) * 2).toLocaleString()}</span>
               </div>
               
               <button onClick={handlePlaceOrder} className="btn btn-primary" style={{ width: '100%' }} disabled={loading || items.length === 0}>

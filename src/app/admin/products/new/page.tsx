@@ -14,14 +14,70 @@ export default function NewProduct() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   
+  const getStandardSizes = (category: string) => {
+    if (category === 'boys' || category === 'girls') {
+      return ['18-24 Month', '2-3 Years', '3-4 Years', '4-5 Years', '5-6 Years', '6-7 Years'];
+    }
+    if (category === 'fabric') {
+      return ['10m', '20m', '30m', '40m', '50m', '60m', '70m', '80m', '90m', '100m'];
+    }
+    return ['S', 'M', 'L', 'XL', 'XXL'];
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'boys'
+    offerPrice: '',
+    description: '',
+    category: 'boys',
+    sizes: getStandardSizes('boys')
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const [allSizes, setAllSizes] = useState<string[]>(getStandardSizes('boys'));
+  const [customSize, setCustomSize] = useState('');
+  const [sizePrices, setSizePrices] = useState<Record<string, string>>({});
+
+  const handleSizePriceChange = (size: string, price: string) => {
+    setSizePrices(prev => ({ ...prev, [size]: price }));
+  };
+
+  const handleAddCustomSize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const trimmed = customSize.trim();
+    if (trimmed && !allSizes.includes(trimmed)) {
+      setAllSizes([...allSizes, trimmed]);
+      setFormData(prev => ({ ...prev, sizes: [...prev.sizes, trimmed] }));
+      setCustomSize('');
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === 'category') {
+      const oldStandard = getStandardSizes(formData.category);
+      const newStandard = getStandardSizes(value);
+      
+      const customAdded = allSizes.filter(s => !oldStandard.includes(s));
+      const customSelected = formData.sizes.filter(s => !oldStandard.includes(s));
+      
+      setAllSizes([...newStandard, ...customAdded]);
+      setFormData(prev => ({ 
+        ...prev, 
+        category: value, 
+        sizes: [...newStandard, ...customSelected] 
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSizeToggle = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size) 
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +97,8 @@ export default function NewProduct() {
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.price || imageFiles.length === 0) {
-        alert("Please fill all fields and select at least one image.");
+      if (!formData.name || (formData.category !== 'fabric' && !formData.price) || imageFiles.length === 0) {
+        alert("Please fill all required fields and select at least one image.");
         setLoading(false);
         return;
       }
@@ -92,12 +148,24 @@ export default function NewProduct() {
         });
       }
 
+      const normalizedSizePrices: Record<string, string> = {};
+      if (formData.category === 'fabric') {
+        Object.entries(sizePrices).forEach(([sz, p]) => {
+          if (p.trim()) {
+            normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
+          }
+        });
+      }
+
       // 3. Save to Firestore
       await addDoc(collection(db, 'products'), {
         ...formData,
+        allSizes: allSizes,
+        sizePrices: normalizedSizePrices,
         image: downloadURLs[0], // Keep backward compatibility for single-image usages
         images: downloadURLs, // Save all up to 5 images
-        price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
+        price: formData.category !== 'fabric' ? (formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`) : '',
+        offerPrice: formData.category !== 'fabric' && formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
         createdAt: new Date().toISOString()
       });
       
@@ -132,16 +200,85 @@ export default function NewProduct() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Price</label>
-          <input 
-            type="text" 
-            name="price"
-            value={formData.price}
+          <label className="form-label">Product Description</label>
+          <textarea 
+            name="description"
+            value={formData.description}
             onChange={handleChange}
             className="form-input" 
-            placeholder="e.g. 1599" 
+            placeholder="Experience the ultimate in comfort and style..." 
+            rows={4}
             required
           />
+        </div>
+
+        {formData.category !== 'fabric' && (
+          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label className="form-label">Actual Price</label>
+              <input 
+                type="text" 
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="form-input" 
+                placeholder="e.g. 1599" 
+                required
+              />
+            </div>
+            <div>
+              <label className="form-label">Offer Price (Optional)</label>
+              <input 
+                type="text" 
+                name="offerPrice"
+                value={formData.offerPrice}
+                onChange={handleChange}
+                className="form-input" 
+                placeholder="e.g. 1299" 
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label">Available Sizes</label>
+          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '0.5rem', marginBottom: '1rem' }}>
+            {allSizes.map(sz => (
+              <div key={sz} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={formData.sizes.includes(sz)} 
+                    onChange={() => handleSizeToggle(sz)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  {sz}
+                </label>
+                {formData.category === 'fabric' && formData.sizes.includes(sz) && (
+                  <input 
+                    type="text" 
+                    value={sizePrices[sz] || ''}
+                    onChange={(e) => handleSizePriceChange(sz, e.target.value)}
+                    placeholder="Price ₹"
+                    className="form-input"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.9rem', width: '80px', height: '30px' }}
+                    required
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <input 
+              type="text" 
+              value={customSize}
+              onChange={(e) => setCustomSize(e.target.value)}
+              className="form-input" 
+              placeholder="Add custom size (e.g. 32, 6 Months)" 
+              style={{ maxWidth: '300px' }}
+            />
+            <button onClick={handleAddCustomSize} className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>+</button>
+          </div>
         </div>
 
         <div className="form-group">
