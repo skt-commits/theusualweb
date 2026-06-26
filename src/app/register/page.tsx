@@ -8,6 +8,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ReCAPTCHA from 'react-google-recaptcha';
 
+const SOUTH_INDIAN_STATES: Record<string, string[]> = {
+  "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+  "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+  "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+  "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Prakasam", "SPSR Nellore", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+  "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Komaram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal-Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+  "Other": ["Other"]
+};
+
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,7 +45,12 @@ function RegisterContent() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'state') {
+      setFormData({ ...formData, state: value, city: '' });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -251,19 +265,33 @@ function RegisterContent() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} className="form-input" required />
+                <label className="form-label">State</label>
+                <select name="state" value={formData.state} onChange={handleChange} className="form-input" required style={{ width: '100%' }}>
+                  <option value="" disabled>Select a state</option>
+                  {Object.keys(SOUTH_INDIAN_STATES).map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Country</label>
-                <input type="text" name="country" value={formData.country} onChange={handleChange} className="form-input" required />
+                <label className="form-label">City / District</label>
+                {formData.state === 'Other' ? (
+                  <input type="text" name="city" value={formData.city} onChange={handleChange} className="form-input" placeholder="Enter your city" required />
+                ) : (
+                  <select name="city" value={formData.city} onChange={handleChange} className="form-input" required style={{ width: '100%' }} disabled={!formData.state}>
+                    <option value="" disabled>Select a district</option>
+                    {formData.state && SOUTH_INDIAN_STATES[formData.state]?.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">State</label>
-                <input type="text" name="state" value={formData.state} onChange={handleChange} className="form-input" required />
+                <label className="form-label">Country</label>
+                <input type="text" name="country" value={formData.country} onChange={handleChange} className="form-input" required readOnly />
               </div>
               <div className="form-group">
                 <label className="form-label">Postcode</label>
