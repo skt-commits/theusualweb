@@ -2,12 +2,50 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useState, useEffect } from 'react';
+
+const HERO_SLIDES = [
+  {
+    id: 'boys',
+    title: 'BOYS FASHION',
+    desc: 'Discover the most vibrant and playful styles tailored for boys.',
+    image: '/images/boys_vibrant.png',
+    link: '/category/boys',
+  },
+  {
+    id: 'girls',
+    title: 'GIRLS FASHION',
+    desc: 'Explore the latest trends and elegant styles for girls.',
+    image: '/images/girls_vibrant.png',
+    link: '/category/girls',
+  },
+  {
+    id: 'mens',
+    title: 'MENS FASHION',
+    desc: 'Classic and modern wear designed for men of style.',
+    image: '/images/mens.png',
+    link: '/category/mens',
+  },
+  {
+    id: 'womens',
+    title: 'WOMENS FASHION',
+    desc: 'Elegant, comfortable, and trendy fashion for women.',
+    image: '/images/womens.png',
+    link: '/category/womens',
+  },
+  {
+    id: 'fabrics',
+    title: 'PREMIUM FABRICS',
+    desc: 'High-quality authentic materials for your custom creations.',
+    image: '/images/fabric_vibrant.png',
+    link: '/category/fabric',
+  }
+];
 
 const CATEGORIES = [
   { id: 'girls', title: 'GIRLS FASHION', image: '/images/girls_vibrant.png', link: '/category/girls' },
@@ -23,6 +61,14 @@ const FALLBACK_NEW_ARRIVALS = [
 
 export default function Home() {
   const [newArrivals, setNewArrivals] = useState<any[]>(FALLBACK_NEW_ARRIVALS);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const slideTimer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(slideTimer);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -52,39 +98,65 @@ export default function Home() {
         </div>
       </div>
 
-      <section className="hero">
-        <div className="container">
+      <section className="hero" style={{ position: 'relative', background: 'var(--accent)', overflow: 'hidden', padding: '0' }}>
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `linear-gradient(135deg, rgba(255, 71, 126, 0.8), rgba(58, 12, 163, 0.8)), url('${HERO_SLIDES[currentSlide].image}') center/cover no-repeat`,
+              zIndex: 0
+            }}
+          />
+        </AnimatePresence>
+
+        <div className="container" style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
           <motion.div 
+            key={currentSlide + '-content'}
             className="hero-content"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            style={{ width: '100%' }}
           >
-            <motion.h1 
-              className="hero-title"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              KIDS FASHION
-            </motion.h1>
-            <motion.p 
-              className="hero-desc"
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              Discover the most vibrant and playful styles tailored for kids of all ages.
-            </motion.p>
-            <motion.div 
-              style={{ display: 'flex', gap: '1rem' }}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              <Link href="#new-arrivals" className="btn btn-white">EXPLORE &rarr;</Link>
-            </motion.div>
+            <h1 className="hero-title">
+              {HERO_SLIDES[currentSlide].title}
+            </h1>
+            <p className="hero-desc">
+              {HERO_SLIDES[currentSlide].desc}
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <Link href={HERO_SLIDES[currentSlide].link} className="btn btn-white">EXPLORE &rarr;</Link>
+            </div>
           </motion.div>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '12px', zIndex: 2 }}>
+          {HERO_SLIDES.map((_, idx) => (
+            <button 
+              key={idx} 
+              onClick={() => setCurrentSlide(idx)}
+              style={{ 
+                width: idx === currentSlide ? '36px' : '12px', 
+                height: '12px', 
+                borderRadius: '6px', 
+                background: idx === currentSlide ? 'white' : 'rgba(255,255,255,0.4)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                padding: 0
+              }} 
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
