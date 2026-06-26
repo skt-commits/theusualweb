@@ -38,6 +38,7 @@ function RegisterContent() {
     city: '',
     country: 'India',
     state: '',
+    customState: '',
     postalCode: '',
     password: '',
     confirmPassword: '',
@@ -150,7 +151,7 @@ function RegisterContent() {
           street: formData.streetAddress,
           city: formData.city,
           country: formData.country,
-          state: formData.state,
+          state: formData.state === 'Other' ? formData.customState : formData.state,
           postalCode: formData.postalCode
         },
         role: 'user',
@@ -287,6 +288,13 @@ function RegisterContent() {
                 )}
               </div>
             </div>
+
+            {formData.state === 'Other' && (
+              <div className="form-group">
+                <label className="form-label">Enter your State</label>
+                <input type="text" name="customState" value={formData.customState} onChange={handleChange} className="form-input" placeholder="e.g. Maharashtra" required />
+              </div>
+            )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
