@@ -46,7 +46,8 @@ export default function Checkout() {
       if (shippingInfo.postalCode.length >= 6) {
         setCalculatingShipping(true);
         try {
-          const res = await fetch(`/api/shiprocket/shipping?pincode=${shippingInfo.postalCode}`);
+          const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0) || 1;
+          const res = await fetch(`/api/shiprocket/shipping?pincode=${shippingInfo.postalCode}&weight=${totalWeight}`);
           if (res.ok) {
             const data = await res.json();
             setShippingCost(data.rate);
@@ -64,7 +65,7 @@ export default function Checkout() {
     
     const timeoutId = setTimeout(fetchShipping, 1000);
     return () => clearTimeout(timeoutId);
-  }, [shippingInfo.postalCode]);
+  }, [shippingInfo.postalCode, items]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
@@ -155,7 +156,7 @@ export default function Checkout() {
               length: 10,
               breadth: 10,
               height: 10,
-              weight: 0.5
+              weight: items.reduce((acc, item) => acc + item.quantity, 0) || 1
             };
 
             // 3. Verify Payment and Push to Shiprocket
