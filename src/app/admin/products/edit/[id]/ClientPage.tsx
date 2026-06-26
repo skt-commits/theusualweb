@@ -18,7 +18,7 @@ export default function ClientPage({ id }: { id: string }) {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'children'
+    category: 'boys'
   });
 
   useEffect(() => {
@@ -163,7 +163,8 @@ export default function ClientPage({ id }: { id: string }) {
         <div className="form-group">
           <label className="form-label">Category</label>
           <select name="category" value={formData.category} onChange={handleChange} className="form-input" required>
-            <option value="children">Children's Fashion</option>
+            <option value="boys">Boys Fashion</option>
+            <option value="girls">Girls Fashion</option>
             <option value="mens">Men's Fashion</option>
             <option value="womens">Women's Fashion</option>
             <option value="fabric">Premium Fabrics</option>

@@ -49,8 +49,8 @@ export default function RootLayout({
                 <div>
                   <h4 className="footer-heading">Shop</h4>
                   <div className="footer-links">
-                    <Link href="/category/new-arrivals" className="footer-link">New Arrivals</Link>
-                    <Link href="/category/children" className="footer-link">Children</Link>
+                    <Link href="/category/boys" className="footer-link">Boys Fashion</Link>
+                    <Link href="/category/girls" className="footer-link">Girls Fashion</Link>
                     <Link href="/category/mens" className="footer-link">Men's Fashion</Link>
                     <Link href="/category/womens" className="footer-link">Women's Fashion</Link>
                   </div>

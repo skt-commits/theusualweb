@@ -17,7 +17,7 @@ export default function NewProduct() {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'children'
+    category: 'boys'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -173,7 +173,8 @@ export default function NewProduct() {
             className="form-input"
             required
           >
-            <option value="children">Children's Fashion</option>
+            <option value="boys">Boys Fashion</option>
+            <option value="girls">Girls Fashion</option>
             <option value="mens">Men's Fashion</option>
             <option value="womens">Women's Fashion</option>
             <option value="fabric">Premium Fabrics</option>

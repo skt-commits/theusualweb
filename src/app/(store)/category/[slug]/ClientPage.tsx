@@ -11,8 +11,9 @@ const getTitle = (slug: string) => {
   const titles: Record<string, string> = {
     'mens': "Men's Premium Collection",
     'womens': "Women's Elegant Collection",
-    'children': "Kids & Children Fashion",
-    'new-arrivals': "Fresh New Arrivals",
+    'boys': "Boys Fashion",
+    'girls': "Girls Fashion",
+    'toddlers': "Toddlers & Infants",
     'fabric': "Premium Fabrics Collection",
   };
   return titles[slug] || "Collection";

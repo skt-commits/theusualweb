@@ -82,7 +82,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
             >
-              <Link href="/category/new-arrivals" className="btn btn-white">EXPLORE &rarr;</Link>
+              <Link href="#new-arrivals" className="btn btn-white">EXPLORE &rarr;</Link>
             </motion.div>
           </motion.div>
         </div>
@@ -137,7 +137,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      <section className="section">
+      <section className="section" id="new-arrivals">
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
             <motion.h2 
