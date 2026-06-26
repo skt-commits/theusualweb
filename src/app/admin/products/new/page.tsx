@@ -33,6 +33,10 @@ export default function NewProduct() {
     sizes: getStandardSizes('boys')
   });
 
+  const [inStock, setInStock] = useState(true);
+  const [colors, setColors] = useState<string[]>([]);
+  const [customColor, setCustomColor] = useState('#000000');
+
   const [allSizes, setAllSizes] = useState<string[]>(getStandardSizes('boys'));
   const [customSize, setCustomSize] = useState('');
   const [sizePrices, setSizePrices] = useState<Record<string, string>>({});
@@ -49,6 +53,17 @@ export default function NewProduct() {
       setFormData(prev => ({ ...prev, sizes: [...prev.sizes, trimmed] }));
       setCustomSize('');
     }
+  };
+
+  const handleAddColor = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!colors.includes(customColor)) {
+      setColors([...colors, customColor]);
+    }
+  };
+
+  const handleRemoveColor = (color: string) => {
+    setColors(colors.filter(c => c !== color));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -162,6 +177,8 @@ export default function NewProduct() {
         ...formData,
         allSizes: allSizes,
         sizePrices: normalizedSizePrices,
+        inStock: inStock,
+        colors: colors,
         image: downloadURLs[0], // Keep backward compatibility for single-image usages
         images: downloadURLs, // Save all up to 5 images
         price: formData.category !== 'fabric' ? (formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`) : '',
@@ -279,6 +296,41 @@ export default function NewProduct() {
             />
             <button onClick={handleAddCustomSize} className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>+</button>
           </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Available Colors</label>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            {colors.map(color => (
+              <div key={color} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f3f4f6', padding: '0.2rem 0.5rem', borderRadius: '20px' }}>
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: color, border: '1px solid #ccc' }} />
+                <span style={{ fontSize: '0.8rem' }}>{color}</span>
+                <button type="button" onClick={() => handleRemoveColor(color)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <input 
+              type="color" 
+              value={customColor}
+              onChange={(e) => setCustomColor(e.target.value)}
+              style={{ width: '50px', height: '40px', padding: '0', cursor: 'pointer', border: '1px solid #ccc', borderRadius: '4px' }}
+            />
+            <button onClick={handleAddColor} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Add Color</button>
+          </div>
+        </div>
+
+        <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <input 
+            type="checkbox" 
+            id="inStock"
+            checked={inStock} 
+            onChange={(e) => setInStock(e.target.checked)}
+            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+          />
+          <label htmlFor="inStock" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', color: inStock ? '#166534' : '#ef4444' }}>
+            {inStock ? 'Product is IN STOCK' : 'Product is OUT OF STOCK'}
+          </label>
         </div>
 
         <div className="form-group">

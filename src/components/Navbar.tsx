@@ -33,7 +33,7 @@ export default function Navbar() {
           <Link href="/" className="nav-link">Home</Link>
           <Link href="/category/boys" className="nav-link">Boys Fashion</Link>
           <Link href="/category/girls" className="nav-link">Girls Fashion</Link>
-          <Link href="/fabric" className="nav-link">Fabric</Link>
+          <Link href="/category/fabric" className="nav-link">Fabric</Link>
           <Link href="/category/mens" className="nav-link">Men's Fashion</Link>
           <Link href="/category/womens" className="nav-link">Women's Fashion</Link>
           <Link href="/contact" className="nav-link">Contact Us</Link>
@@ -80,7 +80,7 @@ export default function Navbar() {
           <Link href="/" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
           <Link href="/category/boys" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Boys Fashion</Link>
           <Link href="/category/girls" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Girls Fashion</Link>
-          <Link href="/fabric" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Fabric</Link>
+          <Link href="/category/fabric" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Fabric</Link>
           <Link href="/category/mens" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Men's Fashion</Link>
           <Link href="/category/womens" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Women's Fashion</Link>
           <Link href="/contact" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>

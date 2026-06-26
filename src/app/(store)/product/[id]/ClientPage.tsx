@@ -4,20 +4,21 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Star } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ClientPage({ id }: { id: string }) {
+  const { user } = useAuth();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
   const [review, setReview] = useState('');
-  const [reviews, setReviews] = useState([
-    { id: 1, author: "Priya S.", rating: 5, text: "Absolutely love the quality! It fits perfectly and the material is so soft." },
-    { id: 2, author: "Rahul M.", rating: 4, text: "Great product for the price. The color is exactly as shown in the pictures." }
-  ]);
+  const [rating, setRating] = useState(5);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   const [size, setSize] = useState('');
+  const [color, setColor] = useState('');
   const [showSizeChart, setShowSizeChart] = useState(false);
 
   useEffect(() => {
@@ -41,6 +42,12 @@ export default function ClientPage({ id }: { id: string }) {
           setActiveImage(data.images && data.images.length > 0 ? data.images[0] : data.image);
           if (data.sizes && data.sizes.length > 0) {
             setSize(data.sizes[0]);
+          }
+          if (data.colors && data.colors.length > 0) {
+            setColor(data.colors[0]);
+          }
+          if (data.reviews) {
+            setReviews(data.reviews);
           }
         } else {
           // Handle Fallback Mock Products from Home Page
@@ -71,15 +78,32 @@ export default function ClientPage({ id }: { id: string }) {
     fetchProduct();
   }, [id]);
 
-  const submitReview = (e: React.FormEvent) => {
+  const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!review.trim()) return;
     
-    setReviews([
-      { id: Date.now(), author: "You", rating: 5, text: review },
-      ...reviews
-    ]);
+    const newReview = {
+      id: Date.now(),
+      author: user?.displayName || user?.email?.split('@')[0] || "Guest User",
+      rating,
+      text: review,
+      date: new Date().toISOString()
+    };
+
+    setReviews([newReview, ...reviews]);
     setReview('');
+    setRating(5);
+
+    try {
+      if (product.id && product.id !== 'na1' && product.id !== 'na2' && product.id !== 'na3') {
+        const docRef = doc(db, 'products', product.id);
+        await updateDoc(docRef, {
+          reviews: arrayUnion(newReview)
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save review:", error);
+    }
   };
 
   if (loading) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Loading Product Details...</div>;
@@ -161,20 +185,44 @@ export default function ClientPage({ id }: { id: string }) {
             
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>About this product</h3>
-              <p style={{ color: 'var(--foreground)', lineHeight: 1.6 }}>
-                {product.description || "Experience the ultimate in comfort and style with our Premium Signature Collection. Crafted from the finest materials, this piece features a modern silhouette that seamlessly blends elegance with everyday wearability."}
-              </p>
+              {product.description ? (
+                <p style={{ color: 'var(--foreground)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  {product.description}
+                </p>
+              ) : (
+                <p style={{ color: 'var(--foreground)', lineHeight: 1.6, fontStyle: 'italic', opacity: 0.7 }}>
+                  No description available.
+                </p>
+              )}
             </div>
             
-            <ul style={{ color: 'var(--foreground)', marginBottom: '2rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
-              {product.features ? product.features.map((feat: string, i: number) => <li key={i}>{feat}</li>) : (
-                <>
-                  <li>Premium Quality Material</li>
-                  <li>Breathable and lightweight fabric</li>
-                  <li>Designed and crafted with love</li>
-                </>
-              )}
-            </ul>
+            {product.features && product.features.length > 0 && (
+              <ul style={{ color: 'var(--foreground)', marginBottom: '2rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+                {product.features.map((feat: string, i: number) => <li key={i}>{feat}</li>)}
+              </ul>
+            )}
+
+            {product.colors && product.colors.length > 0 && (
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h4 style={{ fontWeight: 'bold', marginBottom: '0.8rem' }}>Select Color:</h4>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  {product.colors.map((c: string) => (
+                    <button
+                      key={c}
+                      onClick={() => setColor(c)}
+                      style={{
+                        width: '40px', height: '40px', borderRadius: '50%',
+                        backgroundColor: c,
+                        border: color === c ? '3px solid var(--accent)' : '1px solid #ccc',
+                        cursor: 'pointer',
+                        boxShadow: color === c ? '0 0 0 2px white inset' : 'none'
+                      }}
+                      aria-label={`Color ${c}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div style={{ marginBottom: '2.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
@@ -217,9 +265,17 @@ export default function ClientPage({ id }: { id: string }) {
               </div>
             </div>
             
-            <div style={{ maxWidth: '300px' }}>
-              <AddToCartButton product={product} fullWidth showGoToCart selectedSize={size} />
-            </div>
+            {product.inStock === false ? (
+              <div style={{ maxWidth: '300px' }}>
+                <div style={{ padding: '1rem', textAlign: 'center', background: '#fee2e2', color: '#dc2626', fontWeight: 'bold', borderRadius: '8px', border: '1px solid #f87171' }}>
+                  OUT OF STOCK
+                </div>
+              </div>
+            ) : (
+              <div style={{ maxWidth: '300px' }}>
+                <AddToCartButton product={product} fullWidth showGoToCart selectedSize={size} />
+              </div>
+            )}
           </motion.div>
         </div>
         
@@ -231,6 +287,19 @@ export default function ClientPage({ id }: { id: string }) {
             <div>
               <h3 style={{ marginBottom: '1rem' }}>Write a Review</h3>
               <form onSubmit={submitReview}>
+                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: 'bold' }}>Rating:</span>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star 
+                      key={star} 
+                      size={28} 
+                      fill={star <= rating ? "#fbbf24" : "none"} 
+                      stroke={star <= rating ? "#fbbf24" : "#ccc"}
+                      style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                      onClick={() => setRating(star)}
+                    />
+                  ))}
+                </div>
                 <textarea 
                   className="form-input" 
                   rows={4} 
@@ -244,22 +313,26 @@ export default function ClientPage({ id }: { id: string }) {
             </div>
             
             <div>
-              {reviews.map(r => (
-                <div key={r.id} style={{ marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                      {r.author[0]}
-                    </div>
-                    <div>
-                      <h4 style={{ fontWeight: 'bold' }}>{r.author}</h4>
-                      <div style={{ display: 'flex', color: '#fbbf24' }}>
-                        {[...Array(r.rating)].map((_, i) => <Star key={i} size={14} fill="#fbbf24" />)}
+              {reviews.length === 0 ? (
+                <p style={{ color: 'var(--foreground)' }}>No reviews yet. Be the first to review this product!</p>
+              ) : (
+                reviews.map(r => (
+                  <div key={r.id} style={{ marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                        {r.author[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <h4 style={{ fontWeight: 'bold' }}>{r.author}</h4>
+                        <div style={{ display: 'flex', color: '#fbbf24' }}>
+                          {[...Array(5)].map((_, i) => <Star key={i} size={14} fill={i < r.rating ? "#fbbf24" : "none"} stroke={i < r.rating ? "#fbbf24" : "#ccc"} />)}
+                        </div>
                       </div>
                     </div>
+                    <p style={{ color: 'var(--foreground)', marginTop: '1rem' }}>"{r.text}"</p>
                   </div>
-                  <p style={{ color: 'var(--foreground)', marginTop: '1rem' }}>"{r.text}"</p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
