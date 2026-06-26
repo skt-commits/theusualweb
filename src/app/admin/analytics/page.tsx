@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
           {recentOrders.reverse().map((order, i) => {
             const heightPercentage = Math.max(10, Math.min(100, (order.totalAmount / (stats.averageOrderValue * 2 || 1)) * 100));
             return (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', group: 'true' }}>
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <div style={{ width: '100%', background: 'var(--primary)', height: `${heightPercentage}%`, borderRadius: '4px 4px 0 0', opacity: 0.8, transition: 'all 0.3s' }}></div>
               </div>
             );
