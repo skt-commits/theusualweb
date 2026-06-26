@@ -50,7 +50,7 @@ const HERO_SLIDES = [
 const CATEGORIES = [
   { id: 'girls', title: 'GIRLS FASHION', image: '/images/girls_vibrant.png', link: '/category/girls' },
   { id: 'boys', title: 'BOYS FASHION', image: '/images/boys_vibrant.png', link: '/category/boys' },
-  { id: 'toddlers', title: 'TODDLERS & INFANTS', image: '/images/toddlers_vibrant.png', link: '/category/toddlers' },
+  { id: 'fabric', title: 'PREMIUM FABRICS', image: '/images/fabric_vibrant.png', link: '/category/fabric' },
 ];
 
 const FALLBACK_NEW_ARRIVALS = [
