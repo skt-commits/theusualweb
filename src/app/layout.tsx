@@ -62,7 +62,7 @@ export default function RootLayout({
                 <div>
                   <h4 className="footer-heading">Help</h4>
                   <div className="footer-links">
-                    <Link href="/track" className="footer-link">Track Order</Link>
+                    <a href="https://shiprocket.co/tracking/" target="_blank" rel="noopener noreferrer" className="footer-link">Track Order</a>
                     <Link href="/returns" className="footer-link">Return & Exchange</Link>
                     <Link href="/contact" className="footer-link">Contact Us</Link>
                   </div>

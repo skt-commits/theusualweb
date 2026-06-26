@@ -17,7 +17,7 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
   const isDirect = !!selectedSize;
 
   const getEffectivePrice = (size: string) => {
-    if (product.category === 'fabric' && product.sizePrices && product.sizePrices[size]) {
+    if (product.sizePrices && product.sizePrices[size]) {
       return product.sizePrices[size];
     }
     return product.offerPrice || product.price;

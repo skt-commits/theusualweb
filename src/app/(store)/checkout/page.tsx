@@ -20,6 +20,8 @@ export default function Checkout() {
   const { user, loading: authLoading } = useAuth();
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [calculatingShipping, setCalculatingShipping] = useState(false);
   
   const [shippingInfo, setShippingInfo] = useState({
     firstName: '',
@@ -39,6 +41,31 @@ export default function Checkout() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const fetchShipping = async () => {
+      if (shippingInfo.postalCode.length >= 6) {
+        setCalculatingShipping(true);
+        try {
+          const res = await fetch(`/api/shiprocket/shipping?pincode=${shippingInfo.postalCode}`);
+          if (res.ok) {
+            const data = await res.json();
+            setShippingCost(data.rate);
+          } else {
+            setShippingCost(50);
+          }
+        } catch (error) {
+          setShippingCost(50);
+        }
+        setCalculatingShipping(false);
+      } else {
+        setShippingCost(null);
+      }
+    };
+    
+    const timeoutId = setTimeout(fetchShipping, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [shippingInfo.postalCode]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
@@ -54,9 +81,14 @@ export default function Checkout() {
     setLoading(true);
 
     try {
+      if (shippingCost === null) {
+        setLoading(false);
+        return alert('Please enter a valid pincode to calculate shipping.');
+      }
+      
       const sgstAmount = Math.round(totalPrice * 0.025);
       const cgstAmount = Math.round(totalPrice * 0.025);
-      const finalTotalAmount = totalPrice + sgstAmount + cgstAmount;
+      const finalTotalAmount = totalPrice + sgstAmount + cgstAmount + shippingCost;
 
       // 1. Create order on server to get Razorpay order ID
       const res = await fetch('/api/payment/create-order', {
@@ -87,6 +119,7 @@ export default function Checkout() {
               subtotal: totalPrice,
               sgst: sgstAmount,
               cgst: cgstAmount,
+              shippingCost: shippingCost,
               totalAmount: finalTotalAmount,
               shippingInfo,
               status: 'Processing',
@@ -349,11 +382,17 @@ export default function Checkout() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <span>Shipping</span>
-                <span style={{ color: '#22c55e' }}>Free</span>
+                {calculatingShipping ? (
+                  <span style={{ color: '#666' }}>Calculating...</span>
+                ) : shippingCost !== null ? (
+                  <span>₹ {shippingCost}</span>
+                ) : (
+                  <span style={{ color: '#666' }}>Enter Pincode</span>
+                )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', fontSize: '1.25rem', fontWeight: 'bold' }}>
                 <span>Total</span>
-                <span className="text-gradient">₹ {(totalPrice + Math.round(totalPrice * 0.025) * 2).toLocaleString()}</span>
+                <span className="text-gradient">₹ {(totalPrice + Math.round(totalPrice * 0.025) * 2 + (shippingCost || 0)).toLocaleString()}</span>
               </div>
               
               <button onClick={handlePlaceOrder} className="btn btn-primary" style={{ width: '100%' }} disabled={loading || items.length === 0}>

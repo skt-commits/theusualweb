@@ -238,7 +238,7 @@ export default function UserProfile() {
                           <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>ORDER ID</p>
                           <p style={{ fontWeight: 'bold', margin: 0 }}>...{order.id.slice(-8)}</p>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
+                        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
                           <span style={{ 
                             padding: '0.4rem 1rem', borderRadius: '50px', fontSize: '0.85rem',
                             background: getStatusColor(order.status || 'Processing'), 
@@ -246,6 +246,9 @@ export default function UserProfile() {
                           }}>
                             {order.status || 'Processing'}
                           </span>
+                          <a href={`https://shiprocket.co/tracking/${order.awb || ''}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'underline', fontWeight: 'bold' }}>
+                            Track Parcel
+                          </a>
                         </div>
                       </div>
 

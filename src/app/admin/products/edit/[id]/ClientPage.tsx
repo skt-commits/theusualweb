@@ -149,25 +149,23 @@ export default function ClientPage({ id }: { id: string }) {
     setLoading(true);
 
     try {
-      if (!formData.name || (formData.category !== 'fabric' && !formData.price)) {
+      if (!formData.name || !formData.price) {
         alert("Please fill all required fields.");
         setLoading(false);
         return;
       }
 
       const normalizedSizePrices: Record<string, string> = {};
-      if (formData.category === 'fabric') {
-        Object.entries(sizePrices).forEach(([sz, p]) => {
-          if (p.trim()) {
-            normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
-          }
-        });
-      }
+      Object.entries(sizePrices).forEach(([sz, p]) => {
+        if (p.trim()) {
+          normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
+        }
+      });
 
       let updateData: any = {
         name: formData.name,
-        price: formData.category !== 'fabric' ? (formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`) : '',
-        offerPrice: formData.category !== 'fabric' && formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
+        price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
+        offerPrice: formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
         description: formData.description,
         sizes: formData.sizes,
         allSizes: allSizes,
@@ -260,8 +258,7 @@ export default function ClientPage({ id }: { id: string }) {
           />
         </div>
 
-        {formData.category !== 'fabric' && (
-          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label className="form-label">Actual Price</label>
               <input type="text" name="price" value={formData.price} onChange={handleChange} className="form-input" required />
@@ -270,8 +267,7 @@ export default function ClientPage({ id }: { id: string }) {
               <label className="form-label">Offer Price (Optional)</label>
               <input type="text" name="offerPrice" value={formData.offerPrice} onChange={handleChange} className="form-input" />
             </div>
-          </div>
-        )}
+        </div>
 
         <div className="form-group">
           <label className="form-label">Available Sizes</label>
@@ -287,7 +283,7 @@ export default function ClientPage({ id }: { id: string }) {
                   />
                   {sz}
                 </label>
-                {formData.category === 'fabric' && formData.sizes.includes(sz) && (
+                {formData.sizes.includes(sz) && (
                   <input 
                     type="text" 
                     value={sizePrices[sz] || ''}

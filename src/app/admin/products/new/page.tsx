@@ -112,7 +112,7 @@ export default function NewProduct() {
     setLoading(true);
 
     try {
-      if (!formData.name || (formData.category !== 'fabric' && !formData.price) || imageFiles.length === 0) {
+      if (!formData.name || !formData.price || imageFiles.length === 0) {
         alert("Please fill all required fields and select at least one image.");
         setLoading(false);
         return;
@@ -164,13 +164,11 @@ export default function NewProduct() {
       }
 
       const normalizedSizePrices: Record<string, string> = {};
-      if (formData.category === 'fabric') {
-        Object.entries(sizePrices).forEach(([sz, p]) => {
-          if (p.trim()) {
-            normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
-          }
-        });
-      }
+      Object.entries(sizePrices).forEach(([sz, p]) => {
+        if (p.trim()) {
+          normalizedSizePrices[sz] = p.startsWith('₹') ? p : `₹ ${p}`;
+        }
+      });
 
       // 3. Save to Firestore
       await addDoc(collection(db, 'products'), {
@@ -181,8 +179,8 @@ export default function NewProduct() {
         colors: colors,
         image: downloadURLs[0], // Keep backward compatibility for single-image usages
         images: downloadURLs, // Save all up to 5 images
-        price: formData.category !== 'fabric' ? (formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`) : '',
-        offerPrice: formData.category !== 'fabric' && formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
+        price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
+        offerPrice: formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
         createdAt: new Date().toISOString()
       });
       
@@ -229,8 +227,7 @@ export default function NewProduct() {
           />
         </div>
 
-        {formData.category !== 'fabric' && (
-          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label className="form-label">Actual Price</label>
               <input 
@@ -254,8 +251,7 @@ export default function NewProduct() {
                 placeholder="e.g. 1299" 
               />
             </div>
-          </div>
-        )}
+        </div>
 
         <div className="form-group">
           <label className="form-label">Available Sizes</label>
@@ -271,7 +267,7 @@ export default function NewProduct() {
                   />
                   {sz}
                 </label>
-                {formData.category === 'fabric' && formData.sizes.includes(sz) && (
+                {formData.sizes.includes(sz) && (
                   <input 
                     type="text" 
                     value={sizePrices[sz] || ''}

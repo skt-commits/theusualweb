@@ -164,23 +164,17 @@ export default function ClientPage({ id }: { id: string }) {
               <span style={{ color: 'var(--foreground)', marginLeft: '0.5rem' }}>({reviews.length} reviews)</span>
             </div>
             
-            {product.category === 'fabric' ? (
+            {product.sizePrices && size && product.sizePrices[size] ? (
               <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--primary)' }}>
-                {size && product.sizePrices && product.sizePrices[size] 
-                  ? product.sizePrices[size] 
-                  : (product.sizePrices && Object.values(product.sizePrices).length > 0 
-                      ? `From ${Object.values(product.sizePrices)[0]}` 
-                      : 'Price on Selection')}
+                {product.sizePrices[size]}
               </p>
+            ) : product.offerPrice ? (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '2rem' }}>
+                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{product.offerPrice}</p>
+                <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{product.price}</p>
+              </div>
             ) : (
-              product.offerPrice ? (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '2rem' }}>
-                  <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{product.offerPrice}</p>
-                  <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{product.price}</p>
-                </div>
-              ) : (
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>{product.price}</p>
-              )
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>{product.price}</p>
             )}
             
             <div style={{ marginBottom: '2rem' }}>
