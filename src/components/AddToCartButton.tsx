@@ -17,10 +17,20 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
   const isDirect = !!selectedSize;
 
   const getEffectivePrice = (size: string) => {
-    if (product.sizePrices && product.sizePrices[size]) {
-      return product.sizePrices[size];
+    let basePriceStr = (product.sizePrices && product.sizePrices[size]) 
+      ? product.sizePrices[size] 
+      : (product.offerPrice || product.price);
+      
+    if (product.category === 'fabric' && size && size.endsWith('m')) {
+      const meters = parseInt(size.replace('m', ''), 10);
+      if (!isNaN(meters) && meters > 0) {
+        const numPrice = Number(basePriceStr.replace(/[^0-9.]/g, ''));
+        if (!isNaN(numPrice)) {
+          return `₹ ${numPrice * meters}`;
+        }
+      }
     }
-    return product.offerPrice || product.price;
+    return basePriceStr;
   };
 
   const handleAction = (e: React.MouseEvent) => {
@@ -74,11 +84,7 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
   const renderQuickView = () => {
     if (!showQuickView) return null;
     
-    let availableSizes = product.allSizes;
-    if (!availableSizes) {
-      if (product.category === 'fabric') availableSizes = ['10m', '20m', '30m', '40m', '50m'];
-      else availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
-    }
+    let availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [];
 
     const currentPrice = getEffectivePrice(localSize);
 
@@ -104,18 +110,16 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
               <p style={{ fontWeight: 'bold', fontSize: '1rem', marginBottom: '1rem', color: '#4b5563', textAlign: 'center' }}>SIZE</p>
               <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {availableSizes.map((sz: string) => {
-                  const isAvailable = product.sizes ? product.sizes.includes(sz) : true;
                   return (
                     <button 
                       key={sz}
-                      disabled={!isAvailable}
                       onClick={() => setLocalSize(sz)}
                       style={{ 
                         minWidth: '45px', height: '40px', padding: '0 0.5rem', borderRadius: '6px',
                         border: localSize === sz ? '2px solid #4338ca' : '1px solid #e5e7eb',
-                        background: !isAvailable ? '#f3f4f6' : (localSize === sz ? '#4338ca' : 'white'),
-                        color: !isAvailable ? '#9ca3af' : (localSize === sz ? 'white' : '#374151'),
-                        cursor: isAvailable ? 'pointer' : 'not-allowed',
+                        background: localSize === sz ? '#4338ca' : 'white',
+                        color: localSize === sz ? 'white' : '#374151',
+                        cursor: 'pointer',
                         fontSize: '0.9rem', fontWeight: '500'
                       }}
                     >

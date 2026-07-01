@@ -8,7 +8,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
 
-export default function ClientPage({ id }: { id: string }) {
+import { useSearchParams } from 'next/navigation';
+
+export default function ClientPage() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -37,6 +41,23 @@ export default function ClientPage({ id }: { id: string }) {
   const [inStock, setInStock] = useState(true);
   const [colors, setColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState('#000000');
+
+  const [colorOptions, setColorOptions] = useState<{name: string, price: string, offerPrice: string, imageFile: File | null, existingImage: string}[]>([]);
+
+  const addColorOption = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setColorOptions([...colorOptions, { name: '', price: '', offerPrice: '', imageFile: null, existingImage: '' }]);
+  };
+
+  const updateColorOption = (index: number, field: string, value: any) => {
+    const newOpts = [...colorOptions];
+    newOpts[index] = { ...newOpts[index], [field]: value };
+    setColorOptions(newOpts);
+  };
+
+  const removeColorOption = (index: number) => {
+    setColorOptions(colorOptions.filter((_, i) => i !== index));
+  };
 
   const [allSizes, setAllSizes] = useState<string[]>(getStandardSizes('boys'));
   const [customSize, setCustomSize] = useState('');
@@ -69,6 +90,7 @@ export default function ClientPage({ id }: { id: string }) {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!id) return;
       try {
         const docRef = doc(db, 'products', id);
         const docSnap = await getDoc(docRef);
@@ -94,6 +116,15 @@ export default function ClientPage({ id }: { id: string }) {
           
           if (data.inStock !== undefined) setInStock(data.inStock);
           if (data.colors) setColors(data.colors);
+          if (data.colorOptions) {
+            setColorOptions(data.colorOptions.map((opt: any) => ({
+              name: opt.name || '',
+              price: opt.price ? opt.price.replace('₹ ', '') : '',
+              offerPrice: opt.offerPrice ? opt.offerPrice.replace('₹ ', '') : '',
+              imageFile: null,
+              existingImage: opt.image || ''
+            })));
+          }
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -162,6 +193,31 @@ export default function ClientPage({ id }: { id: string }) {
         }
       });
 
+      const finalColorOptions: any[] = [];
+      for (let i = 0; i < colorOptions.length; i++) {
+        const opt = colorOptions[i];
+        if (!opt.name) continue;
+        let imgUrl = opt.existingImage;
+        if (opt.imageFile) {
+          const compressionOptions = { maxSizeMB: 0.09, maxWidthOrHeight: 800, useWebWorker: true, initialQuality: 0.6 };
+          const compressedFile = await imageCompression(opt.imageFile, compressionOptions);
+          const storageRef = ref(storage, `products/color_${Date.now()}_${compressedFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on('state_changed', null, reject, async () => {
+              imgUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            });
+          });
+        }
+        finalColorOptions.push({
+          name: opt.name,
+          price: opt.price ? (opt.price.startsWith('₹') ? opt.price : `₹ ${opt.price}`) : '',
+          offerPrice: opt.offerPrice ? (opt.offerPrice.startsWith('₹') ? opt.offerPrice : `₹ ${opt.offerPrice}`) : '',
+          image: imgUrl
+        });
+      }
+
       let updateData: any = {
         name: formData.name,
         price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
@@ -172,6 +228,7 @@ export default function ClientPage({ id }: { id: string }) {
         sizePrices: normalizedSizePrices,
         inStock: inStock,
         colors: colors,
+        colorOptions: finalColorOptions,
         category: formData.category,
         updatedAt: new Date().toISOString()
       };
@@ -220,7 +277,7 @@ export default function ClientPage({ id }: { id: string }) {
         updateData.images = downloadURLs;
       }
 
-      await updateDoc(doc(db, 'products', id), updateData);
+      await updateDoc(doc(db, 'products', id!), updateData);
       router.push('/admin/products');
 
     } catch (error) {
@@ -230,6 +287,7 @@ export default function ClientPage({ id }: { id: string }) {
     setLoading(false);
   };
 
+  if (!id) return <div style={{ padding: '2rem' }}>No product ID provided...</div>;
   if (fetching) return <div style={{ padding: '2rem' }}>Loading product details...</div>;
 
   return (
@@ -330,6 +388,34 @@ export default function ClientPage({ id }: { id: string }) {
             />
             <button onClick={handleAddColor} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Add Color</button>
           </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Color Variants (with Images/Prices)</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+            {colorOptions.map((opt, idx) => (
+              <div key={idx} style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong>Variant #{idx + 1}</strong>
+                  <button type="button" onClick={() => removeColorOption(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <input type="text" placeholder="Color Name (e.g. Green)" className="form-input" value={opt.name} onChange={(e) => updateColorOption(idx, 'name', e.target.value)} required />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {opt.existingImage && !opt.imageFile && <img src={opt.existingImage} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} alt="" />}
+                    <input type="file" accept="image/*" className="form-input" onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) updateColorOption(idx, 'imageFile', e.target.files[0]);
+                    }} />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <input type="text" placeholder="Actual Price (e.g. 999)" className="form-input" value={opt.price} onChange={(e) => updateColorOption(idx, 'price', e.target.value)} />
+                  <input type="text" placeholder="Offer Price (e.g. 301)" className="form-input" value={opt.offerPrice} onChange={(e) => updateColorOption(idx, 'offerPrice', e.target.value)} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button onClick={addColorOption} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>+ Add Color Variant</button>
         </div>
 
         <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

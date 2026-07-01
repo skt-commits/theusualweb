@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
-import { Star } from 'lucide-react';
+import { Star, Heart, Share2 } from 'lucide-react';
 import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
@@ -20,6 +20,18 @@ export default function ClientPage({ id }: { id: string }) {
   const [size, setSize] = useState('');
   const [color, setColor] = useState('');
   const [showSizeChart, setShowSizeChart] = useState(false);
+  const [isFavourite, setIsFavourite] = useState(false);
+
+  useEffect(() => {
+    if (product?.id) {
+      try {
+        const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
+        setIsFavourite(favs.includes(product.id));
+      } catch (e) {
+        console.error("Error reading favourites:", e);
+      }
+    }
+  }, [product?.id]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -45,6 +57,10 @@ export default function ClientPage({ id }: { id: string }) {
           }
           if (data.colors && data.colors.length > 0) {
             setColor(data.colors[0]);
+          }
+          if (data.colorOptions && data.colorOptions.length > 0) {
+            setColor(data.colorOptions[0].name);
+            if (data.colorOptions[0].image) setActiveImage(data.colorOptions[0].image);
           }
           if (data.reviews) {
             setReviews(data.reviews);
@@ -78,6 +94,39 @@ export default function ClientPage({ id }: { id: string }) {
     fetchProduct();
   }, [id]);
 
+  const toggleFavourite = () => {
+    if (!product?.id) return;
+    try {
+      let favs = JSON.parse(localStorage.getItem('favourites') || '[]');
+      if (isFavourite) {
+        favs = favs.filter((fid: string) => fid !== product.id);
+      } else {
+        favs.push(product.id);
+      }
+      localStorage.setItem('favourites', JSON.stringify(favs));
+      setIsFavourite(!isFavourite);
+    } catch (error) {
+      console.error("Error updating favourites:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product?.name || 'Product',
+          text: `Check out ${product?.name} on Usual Wear!`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!review.trim()) return;
@@ -108,6 +157,59 @@ export default function ClientPage({ id }: { id: string }) {
 
   if (loading) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Loading Product Details...</div>;
   if (!product) return <div style={{ paddingTop: '150px', paddingBottom: '4rem', textAlign: 'center', fontSize: '1.5rem' }}>Product not found.</div>;
+
+  const getCalculatedPrice = (basePriceStr: string, currentSize: string) => {
+    if (!basePriceStr) return basePriceStr;
+    if (product.category === 'fabric' && currentSize && currentSize.endsWith('m')) {
+      const meters = parseInt(currentSize.replace('m', ''), 10);
+      if (!isNaN(meters) && meters > 0) {
+        const num = Number(basePriceStr.replace(/[^0-9.]/g, ''));
+        if (!isNaN(num)) {
+          return `₹ ${num * meters}`;
+        }
+      }
+    }
+    return basePriceStr;
+  };
+
+  const renderPrice = () => {
+    if (product.sizePrices && size && product.sizePrices[size]) {
+      const sp = getCalculatedPrice(product.sizePrices[size], size);
+      return (
+        <div style={{ marginBottom: '2rem' }}>
+          {product.category === 'fabric' && (
+            <div style={{ marginBottom: '0.5rem', color: '#6b7280', fontSize: '1rem', fontWeight: '500' }}>
+              Base Price: {product.sizePrices[size]} / meter
+            </div>
+          )}
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+            {sp}
+          </p>
+        </div>
+      );
+    }
+    
+    const offerP = product.offerPrice ? getCalculatedPrice(product.offerPrice, size) : null;
+    const regP = getCalculatedPrice(product.price, size);
+
+    return (
+      <div style={{ marginBottom: '2rem' }}>
+        {product.category === 'fabric' && (
+          <div style={{ marginBottom: '0.5rem', color: '#6b7280', fontSize: '1rem', fontWeight: '500' }}>
+            Base Price: {product.offerPrice || product.price} / meter
+          </div>
+        )}
+        {offerP ? (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{offerP}</p>
+            <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{regP}</p>
+          </div>
+        ) : (
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{regP}</p>
+        )}
+      </div>
+    );
+  };
 
   const allImages = product.images || (product.image ? [product.image] : []);
   const isKidsFashion = product.category === 'boys' || product.category === 'girls';
@@ -158,24 +260,31 @@ export default function ClientPage({ id }: { id: string }) {
             animate={{ opacity: 1, x: 0 }}
             style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
-            <h1 className="text-gradient" style={{ fontSize: '3rem', marginBottom: '1rem', lineHeight: 1.1 }}>{product.name}</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <h1 className="text-gradient" style={{ fontSize: '3rem', marginBottom: '1rem', lineHeight: 1.1 }}>{product.name}</h1>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                <button 
+                  onClick={toggleFavourite}
+                  aria-label="Add to Favourites" 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: isFavourite ? '#f43f5e' : 'var(--foreground)' }}
+                >
+                  <Heart size={28} fill={isFavourite ? '#f43f5e' : 'none'} />
+                </button>
+                <button 
+                  onClick={handleShare}
+                  aria-label="Share" 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground)' }}
+                >
+                  <Share2 size={28} />
+                </button>
+              </div>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: '#fbbf24' }}>
               <Star size={20} fill="#fbbf24" /><Star size={20} fill="#fbbf24" /><Star size={20} fill="#fbbf24" /><Star size={20} fill="#fbbf24" /><Star size={20} fill="#fbbf24" />
               <span style={{ color: 'var(--foreground)', marginLeft: '0.5rem' }}>({reviews.length} reviews)</span>
             </div>
             
-            {product.sizePrices && size && product.sizePrices[size] ? (
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--primary)' }}>
-                {product.sizePrices[size]}
-              </p>
-            ) : product.offerPrice ? (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '2rem' }}>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{product.offerPrice}</p>
-                <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{product.price}</p>
-              </div>
-            ) : (
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem' }}>{product.price}</p>
-            )}
+            {renderPrice()}
             
             <div style={{ marginBottom: '2rem' }}>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>About this product</h3>
@@ -194,6 +303,57 @@ export default function ClientPage({ id }: { id: string }) {
               <ul style={{ color: 'var(--foreground)', marginBottom: '2rem', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
                 {product.features.map((feat: string, i: number) => <li key={i}>{feat}</li>)}
               </ul>
+            )}
+
+            {product.colorOptions && product.colorOptions.length > 0 && (
+              <div style={{ marginBottom: '2.5rem' }}>
+                <h4 style={{ fontWeight: 'bold', marginBottom: '0.8rem', fontSize: '1.2rem' }}>
+                  Colour: <span style={{ fontWeight: 'normal' }}>{color}</span>
+                </h4>
+                <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                  {product.colorOptions.map((opt: any, index: number) => {
+                    const isSelected = color === opt.name;
+                    return (
+                      <div 
+                        key={index}
+                        onClick={() => {
+                          setColor(opt.name);
+                          if (opt.image) setActiveImage(opt.image);
+                        }}
+                        style={{
+                          minWidth: '120px',
+                          border: isSelected ? '2px solid #0284c7' : '1px solid #e5e7eb',
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          boxShadow: isSelected ? '0 0 0 1px #0284c7' : 'none'
+                        }}
+                      >
+                        <div style={{ height: '140px', width: '100%', background: '#f3f4f6' }}>
+                          {opt.image ? (
+                            <img src={opt.image} alt={opt.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>No Image</div>
+                          )}
+                        </div>
+                        <div style={{ padding: '0.5rem' }}>
+                          <p style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{opt.name}</p>
+                          {opt.offerPrice ? (
+                            <>
+                              <p style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--primary)' }}>{opt.offerPrice}</p>
+                              <p style={{ fontSize: '0.8rem', textDecoration: 'line-through', color: '#888' }}>{opt.price}</p>
+                            </>
+                          ) : (
+                            <p style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--primary)' }}>{opt.price}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
             {product.colors && product.colors.length > 0 && (
@@ -231,28 +391,24 @@ export default function ClientPage({ id }: { id: string }) {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-                {(product.allSizes || (product.sizes && product.sizes.length ? Array.from(new Set(['S', 'M', 'L', 'XL', 'XXL', ...product.sizes])) : ['S', 'M', 'L', 'XL', 'XXL'])).map((sz: string) => {
-                  const isAvailable = product.sizes ? product.sizes.includes(sz) : true;
+                {(product.sizes && product.sizes.length > 0 ? product.sizes : []).map((sz: string) => {
                   return (
                     <div key={sz} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
                       <button 
-                        disabled={!isAvailable}
                         onClick={() => setSize(sz)}
                         style={{ 
                           minWidth: '45px', height: '45px', borderRadius: '8px', padding: '0 0.5rem',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           border: size === sz ? '2px solid var(--accent)' : '1px solid var(--border-color)',
-                          background: !isAvailable ? '#f3f4f6' : (size === sz ? 'var(--accent)' : 'white'),
-                          color: !isAvailable ? '#9ca3af' : (size === sz ? 'white' : 'var(--foreground)'),
+                          background: size === sz ? 'var(--accent)' : 'white',
+                          color: size === sz ? 'white' : 'var(--foreground)',
                           fontWeight: 'bold', 
-                          cursor: isAvailable ? 'pointer' : 'not-allowed', 
+                          cursor: 'pointer', 
                           transition: 'all 0.2s',
-                          opacity: !isAvailable ? 0.6 : 1
                         }}
                       >
                         {sz}
                       </button>
-                      {!isAvailable && <span style={{ fontSize: '0.65rem', color: '#ef4444', textAlign: 'center', whiteSpace: 'nowrap' }}>No stocks left</span>}
                     </div>
                   );
                 })}

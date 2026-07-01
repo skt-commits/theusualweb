@@ -37,6 +37,23 @@ export default function NewProduct() {
   const [colors, setColors] = useState<string[]>([]);
   const [customColor, setCustomColor] = useState('#000000');
 
+  const [colorOptions, setColorOptions] = useState<{name: string, price: string, offerPrice: string, imageFile: File | null}[]>([]);
+
+  const addColorOption = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setColorOptions([...colorOptions, { name: '', price: '', offerPrice: '', imageFile: null }]);
+  };
+
+  const updateColorOption = (index: number, field: string, value: any) => {
+    const newOpts = [...colorOptions];
+    newOpts[index] = { ...newOpts[index], [field]: value };
+    setColorOptions(newOpts);
+  };
+
+  const removeColorOption = (index: number) => {
+    setColorOptions(colorOptions.filter((_, i) => i !== index));
+  };
+
   const [allSizes, setAllSizes] = useState<string[]>(getStandardSizes('boys'));
   const [customSize, setCustomSize] = useState('');
   const [sizePrices, setSizePrices] = useState<Record<string, string>>({});
@@ -163,6 +180,31 @@ export default function NewProduct() {
         });
       }
 
+      const finalColorOptions: any[] = [];
+      for (let i = 0; i < colorOptions.length; i++) {
+        const opt = colorOptions[i];
+        if (!opt.name) continue;
+        let imgUrl = "";
+        if (opt.imageFile) {
+          const compressionOptions = { maxSizeMB: 0.09, maxWidthOrHeight: 800, useWebWorker: true, initialQuality: 0.6 };
+          const compressedFile = await imageCompression(opt.imageFile, compressionOptions);
+          const storageRef = ref(storage, `products/color_${Date.now()}_${compressedFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on('state_changed', null, reject, async () => {
+              imgUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            });
+          });
+        }
+        finalColorOptions.push({
+          name: opt.name,
+          price: opt.price ? (opt.price.startsWith('₹') ? opt.price : `₹ ${opt.price}`) : '',
+          offerPrice: opt.offerPrice ? (opt.offerPrice.startsWith('₹') ? opt.offerPrice : `₹ ${opt.offerPrice}`) : '',
+          image: imgUrl
+        });
+      }
+
       const normalizedSizePrices: Record<string, string> = {};
       Object.entries(sizePrices).forEach(([sz, p]) => {
         if (p.trim()) {
@@ -177,6 +219,7 @@ export default function NewProduct() {
         sizePrices: normalizedSizePrices,
         inStock: inStock,
         colors: colors,
+        colorOptions: finalColorOptions,
         image: downloadURLs[0], // Keep backward compatibility for single-image usages
         images: downloadURLs, // Save all up to 5 images
         price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
@@ -314,6 +357,31 @@ export default function NewProduct() {
             />
             <button onClick={handleAddColor} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Add Color</button>
           </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Color Variants (with Images/Prices)</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+            {colorOptions.map((opt, idx) => (
+              <div key={idx} style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong>Variant #{idx + 1}</strong>
+                  <button type="button" onClick={() => removeColorOption(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <input type="text" placeholder="Color Name (e.g. Green)" className="form-input" value={opt.name} onChange={(e) => updateColorOption(idx, 'name', e.target.value)} required />
+                  <input type="file" accept="image/*" className="form-input" onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) updateColorOption(idx, 'imageFile', e.target.files[0]);
+                  }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <input type="text" placeholder="Actual Price (e.g. 999)" className="form-input" value={opt.price} onChange={(e) => updateColorOption(idx, 'price', e.target.value)} />
+                  <input type="text" placeholder="Offer Price (e.g. 301)" className="form-input" value={opt.offerPrice} onChange={(e) => updateColorOption(idx, 'offerPrice', e.target.value)} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button onClick={addColorOption} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>+ Add Color Variant</button>
         </div>
 
         <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

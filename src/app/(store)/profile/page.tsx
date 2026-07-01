@@ -2,9 +2,10 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Edit2, Save, X } from 'lucide-react';
 
 const getStatusColor = (status: string) => {
@@ -24,6 +25,8 @@ export default function UserProfile() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [fetchingOrders, setFetchingOrders] = useState(true);
+  const [wishlist, setWishlist] = useState<any[]>([]);
+  const [fetchingWishlist, setFetchingWishlist] = useState(true);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -61,6 +64,27 @@ export default function UserProfile() {
       });
     }
   }, [user, userData]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      setFetchingWishlist(true);
+      try {
+        const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
+        if (favs.length > 0) {
+          const promises = favs.map((id: string) => getDoc(doc(db, 'products', id)));
+          const docs = await Promise.all(promises);
+          const products = docs.filter(d => d.exists()).map(d => ({ id: d.id, ...d.data() }));
+          setWishlist(products);
+        } else {
+          setWishlist([]);
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+      setFetchingWishlist(false);
+    };
+    fetchWishlist();
+  }, []);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -203,6 +227,30 @@ export default function UserProfile() {
                   <button onClick={() => setIsEditing(false)} className="btn btn-outline" style={{ padding: '0.6rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <X size={18} /> Cancel
                   </button>
+                </div>
+              )}
+            </div>
+            
+            {/* Wishlist Card */}
+            <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
+              <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>My Wishlist</h2>
+              {fetchingWishlist ? (
+                <p style={{ fontSize: '0.9rem', color: '#666' }}>Loading...</p>
+              ) : wishlist.length === 0 ? (
+                <p style={{ fontSize: '0.9rem', color: '#666' }}>Your wishlist is empty.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {wishlist.map(item => (
+                    <Link href={`/product/${item.id}`} key={item.id} style={{ display: 'flex', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
+                      <div style={{ width: '60px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#eee', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                        <img src={item.image || (item.images && item.images[0])} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.name} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '0.95rem', fontWeight: 'bold' }}>{item.name}</h4>
+                        <p style={{ margin: 0, color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.offerPrice || item.price}</p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>

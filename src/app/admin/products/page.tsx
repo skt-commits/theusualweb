@@ -69,7 +69,7 @@ export default function AdminProducts() {
                   <td style={{ padding: '1rem' }}>{product.price}</td>
                   <td style={{ padding: '1rem', textTransform: 'capitalize' }}>{product.category}</td>
                   <td style={{ padding: '1rem' }}>
-                    <Link href={`/admin/products/edit/${product.id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem', display: 'inline-block' }}>Edit</Link>
+                    <Link href={`/admin/products/edit?id=${product.id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem', display: 'inline-block' }}>Edit</Link>
                     <button onClick={() => handleDelete(product.id)} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#ef4444', border: 'none' }}>Delete</button>
                   </td>
                 </tr>
