@@ -40,7 +40,10 @@ export default function AdminProducts() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem' }}>Manage Products</h1>
-        <Link href="/admin/products/new" className="btn btn-primary">Add New Product</Link>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <Link href="/admin/stock" className="btn btn-outline">Manage Stock</Link>
+          <Link href="/admin/products/new" className="btn btn-primary">Add New Product</Link>
+        </div>
       </div>
 
       <div className="glass-panel" style={{ padding: '1rem' }}>

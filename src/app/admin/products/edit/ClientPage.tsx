@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -18,6 +18,27 @@ export default function ClientPage() {
   const [fetching, setFetching] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [existingSubcategories, setExistingSubcategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      try {
+        const q = collection(db, 'products');
+        const querySnapshot = await getDocs(q);
+        const subcategories = new Set<string>();
+        querySnapshot.forEach((d) => {
+          const data = d.data();
+          if (data.subcategory) {
+            subcategories.add(data.subcategory);
+          }
+        });
+        setExistingSubcategories(Array.from(subcategories));
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+      }
+    };
+    fetchSubcategories();
+  }, []);
   
   const getStandardSizes = (category: string) => {
     if (category === 'boys' || category === 'girls') {
@@ -35,6 +56,8 @@ export default function ClientPage() {
     offerPrice: '',
     description: '',
     category: 'boys',
+    subcategory: '',
+    stock: '',
     sizes: getStandardSizes('boys')
   });
 
@@ -103,6 +126,8 @@ export default function ClientPage() {
             offerPrice: data.offerPrice ? data.offerPrice.replace('₹ ', '') : '',
             description: data.description || '',
             category: data.category,
+            subcategory: data.subcategory || '',
+            stock: data.stock !== undefined ? String(data.stock) : '',
             sizes: data.sizes || standardSizesForCategory
           });
           
@@ -149,6 +174,10 @@ export default function ClientPage() {
         category: value, 
         sizes: [...newStandard, ...customSelected] 
       }));
+    } else if (name === 'subcategorySelect') {
+      if (value !== 'custom') {
+        setFormData(prev => ({ ...prev, subcategory: value }));
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -230,6 +259,8 @@ export default function ClientPage() {
         colors: colors,
         colorOptions: finalColorOptions,
         category: formData.category,
+        subcategory: formData.subcategory,
+        stock: Number(formData.stock) || 0,
         updatedAt: new Date().toISOString()
       };
 
@@ -450,6 +481,49 @@ export default function ClientPage() {
             <option value="womens">Women's Fashion</option>
             <option value="fabric">Premium Fabrics</option>
           </select>
+        </div>
+
+        <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div>
+            <label className="form-label">Subcategory</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {existingSubcategories.length > 0 && (
+                <select
+                  name="subcategorySelect"
+                  className="form-input"
+                  onChange={handleChange}
+                  defaultValue=""
+                >
+                  <option value="" disabled>Select existing...</option>
+                  {existingSubcategories.map(sc => (
+                    <option key={sc} value={sc}>{sc}</option>
+                  ))}
+                  <option value="custom">-- Enter New Subcategory --</option>
+                </select>
+              )}
+              <input 
+                type="text" 
+                name="subcategory"
+                value={formData.subcategory}
+                onChange={handleChange}
+                className="form-input" 
+                placeholder={existingSubcategories.length > 0 ? "Or type new subcategory" : "e.g. shirt, pant"} 
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label className="form-label">Total Stock Available</label>
+            <input 
+              type="number" 
+              name="stock"
+              value={formData.stock}
+              onChange={handleChange}
+              className="form-input" 
+              placeholder="e.g. 50" 
+              required
+            />
+          </div>
         </div>
 
         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>

@@ -91,7 +91,14 @@ export default function ClientPage({ slug }: { slug: string }) {
                   <Link href={`/product/${product.id}`}>
                     <h4 className="product-name">{product.name}</h4>
                   </Link>
-                  <span className="product-price">{product.price}</span>
+                  {product.offerPrice ? (
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                      <span className="product-price" style={{ textDecoration: 'line-through', color: '#888', fontSize: '0.9rem' }}>{product.price}</span>
+                      <span className="product-price" style={{ color: '#f43f5e' }}>{product.offerPrice}</span>
+                    </div>
+                  ) : (
+                    <span className="product-price">{product.price}</span>
+                  )}
                   <div className="product-add">
                     <AddToCartButton product={product} fullWidth />
                   </div>

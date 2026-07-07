@@ -173,40 +173,33 @@ export default function ClientPage({ id }: { id: string }) {
   };
 
   const renderPrice = () => {
+    const originalPrice = getCalculatedPrice(product.price, size);
+    let currentPrice = originalPrice;
+    let basePriceStr = product.price;
+
     if (product.sizePrices && size && product.sizePrices[size]) {
-      const sp = getCalculatedPrice(product.sizePrices[size], size);
-      return (
-        <div style={{ marginBottom: '2rem' }}>
-          {product.category === 'fabric' && (
-            <div style={{ marginBottom: '0.5rem', color: '#6b7280', fontSize: '1rem', fontWeight: '500' }}>
-              Base Price: {product.sizePrices[size]} / meter
-            </div>
-          )}
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-            {sp}
-          </p>
-        </div>
-      );
+      currentPrice = getCalculatedPrice(product.sizePrices[size], size);
+      basePriceStr = product.sizePrices[size];
+    } else if (product.offerPrice) {
+      currentPrice = getCalculatedPrice(product.offerPrice, size);
+      basePriceStr = product.offerPrice;
     }
-    
-    const offerP = product.offerPrice ? getCalculatedPrice(product.offerPrice, size) : null;
-    const regP = getCalculatedPrice(product.price, size);
 
     return (
       <div style={{ marginBottom: '2rem' }}>
         {product.category === 'fabric' && (
           <div style={{ marginBottom: '0.5rem', color: '#6b7280', fontSize: '1rem', fontWeight: '500' }}>
-            Base Price: {product.offerPrice || product.price} / meter
+            Base Price: {basePriceStr} / meter
           </div>
         )}
-        {offerP ? (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{offerP}</p>
-            <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{regP}</p>
-          </div>
-        ) : (
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{regP}</p>
-        )}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
+          {originalPrice && originalPrice !== currentPrice && (
+            <p style={{ fontSize: '1.2rem', textDecoration: 'line-through', color: '#888' }}>{originalPrice}</p>
+          )}
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+            {currentPrice}
+          </p>
+        </div>
       </div>
     );
   };

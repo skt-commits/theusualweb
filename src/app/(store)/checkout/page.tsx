@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Script from 'next/script';
 
@@ -130,9 +130,23 @@ export default function Checkout() {
               status: 'Processing',
               paymentMethod: 'Razorpay',
               transactionId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
               createdAt: new Date().toISOString()
             });
+
+            // Update stock
+            for (const item of items) {
+              const originalProductId = item.productId || item.id.split('-')[0];
+              if (originalProductId) {
+                try {
+                  const productRef = doc(db, 'products', originalProductId);
+                  await updateDoc(productRef, {
+                    stock: increment(-item.quantity)
+                  });
+                } catch (err) {
+                  console.error("Failed to update stock for", originalProductId, err);
+                }
+              }
+            }
 
             // Prepare Shiprocket payload
             const shiprocketPayload = {

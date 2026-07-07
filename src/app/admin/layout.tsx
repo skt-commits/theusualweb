@@ -33,6 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/products" className="nav-link">Manage Products</Link>
           <Link href="/admin/orders" className="nav-link">Manage Orders</Link>
           <Link href="/admin/users" className="nav-link">Manage Users</Link>
+          <Link href="/admin/stock" className="nav-link">Manage Stock</Link>
           <Link href="/admin/coupons" className="nav-link">Coupons</Link>
           <Link href="/admin/analytics" className="nav-link">Analytics</Link>
           <Link href="/admin/settings" className="nav-link">Settings</Link>

@@ -38,7 +38,7 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
     e.stopPropagation();
     if (isDirect) {
       if (quantity === 0) {
-        addToCart({ ...product, id: cartProductId, name: cartProductName, price: getEffectivePrice(activeSize) });
+        addToCart({ ...product, id: cartProductId, productId: product.id, name: cartProductName, price: getEffectivePrice(activeSize) });
       }
     } else {
       setShowQuickView(true);
@@ -153,7 +153,7 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
           <div style={{ padding: '1.5rem', borderTop: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'white' }}>
             {quantity === 0 ? (
               <button 
-                onClick={() => addToCart({ ...product, id: cartProductId, name: cartProductName, price: currentPrice })}
+                onClick={() => addToCart({ ...product, id: cartProductId, productId: product.id, name: cartProductName, price: currentPrice })}
                 style={{ width: '100%', padding: '1rem', background: '#f43f5e', color: 'white', border: 'none', borderRadius: '30px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(244,63,94,0.3)' }}
               >
                 ADD TO CART
