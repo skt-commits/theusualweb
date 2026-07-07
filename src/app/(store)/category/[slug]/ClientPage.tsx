@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AddToCartButton from '@/components/AddToCartButton';
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useSearchParams } from 'next/navigation';
 import { db } from '@/lib/firebase';
 
 const getTitle = (slug: string) => {
@@ -21,6 +22,8 @@ const getTitle = (slug: string) => {
 
 export default function ClientPage({ slug }: { slug: string }) {
   const title = getTitle(slug);
+  const searchParams = useSearchParams();
+  const subcategory = searchParams.get('subcategory');
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +35,11 @@ export default function ClientPage({ slug }: { slug: string }) {
         if (slug === 'new-arrivals') {
           q = query(collection(db, 'products')); // Fetch all or recent for new-arrivals
         } else {
-          q = query(collection(db, 'products'), where('category', '==', slug));
+          if (subcategory) {
+            q = query(collection(db, 'products'), where('category', '==', slug), where('subcategory', '==', subcategory));
+          } else {
+            q = query(collection(db, 'products'), where('category', '==', slug));
+          }
         }
         
         const querySnapshot = await getDocs(q);
@@ -45,7 +52,7 @@ export default function ClientPage({ slug }: { slug: string }) {
     };
 
     fetchProducts();
-  }, [slug]);
+  }, [slug, subcategory]);
 
   return (
     <main style={{ paddingBottom: '4rem' }}>
@@ -59,7 +66,14 @@ export default function ClientPage({ slug }: { slug: string }) {
           >
             {title}
           </motion.h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.2rem' }}>Discover the perfect styles tailored for you.</p>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.2rem' }}>
+            Discover the perfect styles tailored for you.
+            {subcategory && (
+              <span style={{ display: 'block', marginTop: '0.5rem', fontWeight: 'bold', color: 'var(--highlight)' }}>
+                Filter: {subcategory}
+              </span>
+            )}
+          </p>
         </div>
       </div>
 

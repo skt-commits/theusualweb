@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Link from 'next/link';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [subcategoriesMap, setSubcategoriesMap] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     fetchProducts();
@@ -18,11 +20,36 @@ export default function AdminProducts() {
     try {
       const querySnapshot = await getDocs(collection(db, 'products'));
       const prods = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      const subsMap: Record<string, Set<string>> = {};
+      prods.forEach(prod => {
+        if (prod.category && prod.subcategory) {
+          if (!subsMap[prod.category]) subsMap[prod.category] = new Set();
+          subsMap[prod.category].add(prod.subcategory);
+        }
+      });
+      const finalSubsMap: Record<string, string[]> = {};
+      for (const cat in subsMap) {
+        finalSubsMap[cat] = Array.from(subsMap[cat]);
+      }
+      setSubcategoriesMap(finalSubsMap);
       setProducts(prods);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
     setLoading(false);
+  };
+
+  const handleSubcategoryUpdate = async (productId: string, newSubcategory: string) => {
+    setUpdatingId(productId);
+    try {
+      await updateDoc(doc(db, 'products', productId), { subcategory: newSubcategory });
+      setProducts(products.map(p => p.id === productId ? { ...p, subcategory: newSubcategory } : p));
+    } catch (error) {
+      console.error("Error updating subcategory:", error);
+      alert("Failed to update subcategory.");
+    }
+    setUpdatingId(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -59,6 +86,7 @@ export default function AdminProducts() {
                 <th style={{ padding: '1rem' }}>Name</th>
                 <th style={{ padding: '1rem' }}>Price</th>
                 <th style={{ padding: '1rem' }}>Category</th>
+                <th style={{ padding: '1rem' }}>Subcategory</th>
                 <th style={{ padding: '1rem' }}>Actions</th>
               </tr>
             </thead>
@@ -71,6 +99,22 @@ export default function AdminProducts() {
                   <td style={{ padding: '1rem', fontWeight: 'bold' }}>{product.name}</td>
                   <td style={{ padding: '1rem' }}>{product.price}</td>
                   <td style={{ padding: '1rem', textTransform: 'capitalize' }}>{product.category}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <select 
+                        value={product.subcategory || ''} 
+                        onChange={(e) => handleSubcategoryUpdate(product.id, e.target.value)}
+                        disabled={updatingId === product.id}
+                        style={{ padding: '0.3rem', borderRadius: '4px', border: '1px solid var(--border-color)', minWidth: '120px' }}
+                      >
+                        <option value="">-- None --</option>
+                        {subcategoriesMap[product.category]?.map(sub => (
+                          <option key={sub} value={sub}>{sub}</option>
+                        ))}
+                      </select>
+                      {updatingId === product.id && <span style={{ fontSize: '0.8rem', color: '#666' }}>Saving...</span>}
+                    </div>
+                  </td>
                   <td style={{ padding: '1rem' }}>
                     <Link href={`/admin/products/edit?id=${product.id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', marginRight: '0.5rem', display: 'inline-block' }}>Edit</Link>
                     <button onClick={() => handleDelete(product.id)} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#ef4444', border: 'none' }}>Delete</button>

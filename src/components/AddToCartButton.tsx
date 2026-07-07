@@ -3,11 +3,17 @@ import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Plus, Minus, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 
 export default function AddToCartButton({ product, fullWidth = false, showGoToCart = false, selectedSize }: { product: any, fullWidth?: boolean, showGoToCart?: boolean, selectedSize?: string }) {
   const { addToCart, updateQuantity, getItemQuantity } = useCart();
   const [showQuickView, setShowQuickView] = useState(false);
   const [localSize, setLocalSize] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const activeSize = selectedSize || localSize;
   const cartProductId = activeSize ? `${product.id}-${activeSize}` : product.id;
@@ -82,13 +88,13 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
   }
 
   const renderQuickView = () => {
-    if (!showQuickView) return null;
+    if (!showQuickView || !mounted) return null;
     
     let availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [];
 
     const currentPrice = getEffectivePrice(localSize);
 
-    return (
+    return createPortal(
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 99999, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'flex-end' }} onClick={(e) => { e.stopPropagation(); setShowQuickView(false); }}>
         <div style={{ width: '400px', maxWidth: '100%', height: '100%', background: 'white', display: 'flex', flexDirection: 'column', boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', animation: 'slideInRight 0.3s forwards' }} onClick={e => e.stopPropagation()}>
           <div style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
@@ -171,7 +177,8 @@ export default function AddToCartButton({ product, fullWidth = false, showGoToCa
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         `}} />
-      </div>
+      </div>,
+      document.body
     );
   };
 

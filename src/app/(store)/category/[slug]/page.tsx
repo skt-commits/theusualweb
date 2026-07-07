@@ -1,4 +1,5 @@
 import ClientPage from './ClientPage';
+import { Suspense } from 'react';
 
 export function generateStaticParams() {
   return [
@@ -18,5 +19,9 @@ export function generateStaticParams() {
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <ClientPage slug={slug} />;
+  return (
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: '4rem' }}>Loading Category...</div>}>
+      <ClientPage slug={slug} />
+    </Suspense>
+  );
 }

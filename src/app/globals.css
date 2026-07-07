@@ -113,6 +113,113 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--accent);
 }
 
+/* Navbar Dropdown */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0.5rem 0;
+}
+.dropdown-menu {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: white;
+  min-width: 180px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  z-index: 1001;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+.nav-item:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: var(--transition);
+  text-align: center;
+}
+.dropdown-item:hover {
+  background: rgba(67, 97, 238, 0.05);
+  color: var(--primary);
+}
+
+/* Sub Dropdown for Recent Products */
+.dropdown-item-wrapper {
+  position: relative;
+}
+.sub-dropdown-menu {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: white;
+  min-width: 260px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  z-index: 1002;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.dropdown-item-wrapper:hover .sub-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.nav-product-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  text-decoration: none;
+  text-align: left;
+}
+.nav-product-card:hover {
+  background: rgba(67, 97, 238, 0.05);
+}
+.nav-product-img {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.nav-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.nav-product-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+.nav-product-price {
+  font-size: 0.75rem;
+  color: var(--highlight);
+  font-weight: 800;
+}
+
 /* Buttons */
 .btn {
   display: inline-block;
