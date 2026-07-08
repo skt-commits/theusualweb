@@ -69,17 +69,17 @@ export default function Navbar() {
     <>
       <div className="ticker-wrap" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1001, height: '36px', padding: '0.4rem 0', background: '#128C7E' }}>
         <div className="ticker" style={{ fontSize: '0.85rem', letterSpacing: '0.05em', color: 'white' }}>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>For Bulk/Corporate and International orders, contact us through WhatsApp: <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>+91 90922 14148</a></span>
+          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
         </div>
       </div>
       <nav className="glass-nav" style={{ top: '36px' }}>

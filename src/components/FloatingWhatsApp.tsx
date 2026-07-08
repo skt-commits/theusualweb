@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle, X, Globe, BadgePercent } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 export default function FloatingWhatsApp() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -13,6 +15,8 @@ export default function FloatingWhatsApp() {
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  if (pathname !== '/contact') return null;
 
   const showMenu = showTooltip || isHovered;
 
