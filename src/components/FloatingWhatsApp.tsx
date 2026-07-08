@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Globe, BadgePercent } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FloatingWhatsApp() {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -13,30 +14,61 @@ export default function FloatingWhatsApp() {
     return () => clearTimeout(timer);
   }, []);
 
+  const showMenu = showTooltip || isHovered;
+
   return (
-    <div style={{ position: 'fixed', bottom: 'clamp(1rem, 3vw, 2rem)', right: 'clamp(1rem, 3vw, 2rem)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
+    <div 
+      style={{ position: 'fixed', bottom: 'clamp(1rem, 3vw, 2rem)', right: 'clamp(1rem, 3vw, 2rem)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => { setIsHovered(false); setShowTooltip(false); }}
+    >
       <AnimatePresence>
-        {showTooltip && (
+        {showMenu && (
           <motion.div 
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             style={{ 
-              background: 'white', 
-              padding: '0.8rem 1rem', 
+              background: '#111', 
+              padding: '0.5rem 0', 
               borderRadius: '8px', 
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
               display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              position: 'relative'
+              flexDirection: 'column',
+              position: 'relative',
+              minWidth: '220px'
             }}
           >
-            <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#333' }}>Contact for any queries...</span>
-            <button onClick={() => setShowTooltip(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-              <X size={14} color="#666" />
+            <a 
+              href="https://api.whatsapp.com/send/?phone=919092214148&text=Hi%2C+I+want+to+know+about+Bulk%2FCorporate+Orders.&type=phone_number&app_absent=0" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'white', padding: '0.8rem 1.2rem', textDecoration: 'none', fontSize: '0.9rem', transition: 'background 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <BadgePercent size={18} />
+              Bulk/Corporate Orders
+            </a>
+            
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0 1rem' }} />
+            
+            <a 
+              href="https://api.whatsapp.com/send/?phone=919092214148&text=Hi%2C+I+want+to+know+about+International+Orders.&type=phone_number&app_absent=0" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'white', padding: '0.8rem 1.2rem', textDecoration: 'none', fontSize: '0.9rem', transition: 'background 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <Globe size={18} />
+              International Orders
+            </a>
+
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTooltip(false); setIsHovered(false); }} style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'white', border: '1px solid #ccc', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
+              <X size={14} color="#333" />
             </button>
-            <div style={{ position: 'absolute', bottom: '-8px', right: '20px', width: '0', height: '0', borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '8px solid white' }} />
+            <div style={{ position: 'absolute', bottom: '-8px', right: '20px', width: '0', height: '0', borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '8px solid #111' }} />
           </motion.div>
         )}
       </AnimatePresence>

@@ -84,25 +84,25 @@ export default function ContactPage() {
           <div>
             <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Contact Information</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><Mail /></div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ width: '50px', height: '50px', flexShrink: 0, borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><Mail /></div>
                 <div>
                   <h4 style={{ fontWeight: 'bold' }}>Email</h4>
                   <p>theusualsalem@gmail.com</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><Phone /></div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ width: '50px', height: '50px', flexShrink: 0, borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><Phone /></div>
                 <div>
                   <h4 style={{ fontWeight: 'bold' }}>Phone</h4>
                   <p>+91 9092214148</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><MapPin /></div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                <div style={{ width: '50px', height: '50px', flexShrink: 0, borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}><MapPin /></div>
                 <div>
                   <h4 style={{ fontWeight: 'bold' }}>Office</h4>
-                  <p>123 Fashion Street, Salem, Tamil Nadu, India</p>
+                  <p>56, Kudi Street,Anaigoundampatti, Kottagoundampatty, salem, Tamil Nadu 636011</p>
                 </div>
               </div>
             </div>

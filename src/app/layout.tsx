@@ -60,6 +60,7 @@ export default function RootLayout({
                     <Link href="/category/girls" className="footer-link">Girls Fashion</Link>
                     <Link href="/category/mens" className="footer-link">Men's Fashion</Link>
                     <Link href="/category/womens" className="footer-link">Women's Fashion</Link>
+                    <Link href="/category/accessories" className="footer-link">Accessories</Link>
                   </div>
                 </div>
                 

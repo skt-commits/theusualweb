@@ -460,6 +460,7 @@ export default function NewProduct() {
             <option value="mens">Men's Fashion</option>
             <option value="womens">Women's Fashion</option>
             <option value="fabric">Premium Fabrics</option>
+            <option value="accessories">Accessories</option>
           </select>
         </div>
 

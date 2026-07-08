@@ -13,7 +13,7 @@ export default function SettingsPage() {
     supportEmail: 'theusualsalem@gmail.com',
     supportPhone: '+91 9092214148',
     whatsappNumber: '919092214148',
-    address: 'Salem, Tamil Nadu, India',
+    address: '56, Kudi Street,Anaigoundampatti, Kottagoundampatty, salem, Tamil Nadu 636011',
     maintenanceMode: false,
     shippingFee: 0,
     freeShippingThreshold: 500
