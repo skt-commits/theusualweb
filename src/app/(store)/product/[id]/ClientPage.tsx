@@ -115,7 +115,7 @@ export default function ClientPage({ id }: { id: string }) {
       if (navigator.share) {
         await navigator.share({
           title: product?.name || 'Product',
-          text: `Check out ${product?.name} on Usual Wear!`,
+          text: `Check out ${product?.name} on The Usuals!`,
           url: window.location.href,
         });
       } else {
@@ -408,17 +408,34 @@ export default function ClientPage({ id }: { id: string }) {
               </div>
             </div>
             
-            {product.inStock === false ? (
-              <div style={{ maxWidth: '300px' }}>
-                <div style={{ padding: '1rem', textAlign: 'center', background: '#fee2e2', color: '#dc2626', fontWeight: 'bold', borderRadius: '8px', border: '1px solid #f87171' }}>
-                  OUT OF STOCK
+            <div className="mobile-fixed-cart">
+              {product.inStock === false ? (
+                <div style={{ width: '100%' }}>
+                  <div style={{ padding: '1rem', textAlign: 'center', background: '#fee2e2', color: '#dc2626', fontWeight: 'bold', borderRadius: '8px', border: '1px solid #f87171' }}>
+                    OUT OF STOCK
+                  </div>
                 </div>
+              ) : (
+                <div style={{ width: '100%' }}>
+                  <AddToCartButton product={product} fullWidth showGoToCart selectedSize={size} />
+                </div>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', maxWidth: '350px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>🚚</span>
+                <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: '500' }}>Dispatched within 24-48 Hours</span>
               </div>
-            ) : (
-              <div style={{ maxWidth: '300px' }}>
-                <AddToCartButton product={product} fullWidth showGoToCart selectedSize={size} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>🔄</span>
+                <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: '500' }}>Easy 7-Day Returns & Exchanges</span>
               </div>
-            )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>🔒</span>
+                <span style={{ fontSize: '0.9rem', color: '#334155', fontWeight: '500' }}>100% Secure Checkout</span>
+              </div>
+            </div>
           </motion.div>
         </div>
         
@@ -555,6 +572,37 @@ export default function ClientPage({ id }: { id: string }) {
         @media (max-width: 768px) {
           .product-layout-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
           .review-grid { grid-template-columns: 1fr !important; }
+          
+          main { padding-bottom: 6rem !important; }
+          
+          .mobile-fixed-cart {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            background: white;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+          }
+          
+          .mobile-fixed-cart > div {
+            max-width: 100% !important;
+          }
+          
+          .mobile-fixed-cart button.btn-primary {
+            background: #000 !important;
+            color: #fff !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+          }
+        }
+        
+        @media (min-width: 769px) {
+          .mobile-fixed-cart {
+            max-width: 300px;
+          }
         }
       `}} />
     </main>
