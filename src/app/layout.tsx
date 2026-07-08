@@ -10,6 +10,10 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 export const metadata: Metadata = {
   title: 'The Usuals - Premium Fashion for Everyone',
   description: 'Shop the latest collections of Boys, Girls, Mens, and Womens fashion at The Usuals.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://theusuals.in'),
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'YOUR_VERIFICATION_CODE_HERE',
+  },
 };
 
 export const viewport: Viewport = {
