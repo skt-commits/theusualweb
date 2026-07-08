@@ -19,7 +19,7 @@ export default function AdminProducts() {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, 'products'));
-      const prods = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const prods: any[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
       const subsMap: Record<string, Set<string>> = {};
       prods.forEach(prod => {

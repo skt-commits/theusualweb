@@ -25,7 +25,7 @@ export default function Navbar() {
         const snapshot = await getDocs(q);
         const subs: Record<string, Set<string>> = {};
         
-        const allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const allProducts: any[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         allProducts.sort((a: any, b: any) => {
            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
