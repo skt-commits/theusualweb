@@ -24,9 +24,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '80vh', paddingTop: '80px' }}>
+    <div style={{ display: 'flex', minHeight: '80vh', paddingTop: '140px' }}>
       {/* Admin Sidebar */}
-      <div style={{ width: '250px', background: 'white', borderRight: '1px solid var(--border-color)', padding: '2rem', minHeight: 'calc(100vh - 80px)' }}>
+      <div style={{ width: '250px', background: 'white', borderRight: '1px solid var(--border-color)', padding: '2rem', minHeight: 'calc(100vh - 140px)' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: 'var(--accent)' }}>Admin Panel</h2>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Link href="/admin/dashboard" className="nav-link" style={{ fontWeight: 'bold' }}>Dashboard</Link>

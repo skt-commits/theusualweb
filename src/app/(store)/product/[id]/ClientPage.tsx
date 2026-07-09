@@ -208,7 +208,7 @@ export default function ClientPage({ id }: { id: string }) {
   const isKidsFashion = product.category === 'boys' || product.category === 'girls';
 
   return (
-    <main style={{ paddingTop: '100px', paddingBottom: '4rem' }}>
+    <main style={{ paddingTop: '140px', paddingBottom: '4rem' }}>
       <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', marginBottom: '4rem' }} className="product-layout-grid">
           

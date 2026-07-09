@@ -130,7 +130,7 @@ export default function UserProfile() {
   };
 
   if (loading || !user) {
-    return <main style={{ paddingTop: '100px', minHeight: '80vh', textAlign: 'center' }}>Loading your profile...</main>;
+    return <main style={{ paddingTop: '140px', minHeight: '80vh', textAlign: 'center' }}>Loading your profile...</main>;
   }
 
   return (

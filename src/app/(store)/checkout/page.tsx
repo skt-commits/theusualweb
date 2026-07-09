@@ -254,7 +254,7 @@ export default function Checkout() {
 
   if (success) {
     return (
-      <main style={{ paddingTop: '120px', paddingBottom: '4rem', textAlign: 'center' }}>
+      <main style={{ paddingTop: '140px', paddingBottom: '4rem', textAlign: 'center' }}>
         <div className="container">
           <div className="glass-panel auth-card">
             <CheckCircle size={64} color="#22c55e" style={{ margin: '0 auto 1.5rem' }} />
@@ -271,12 +271,12 @@ export default function Checkout() {
   }
 
   if (authLoading) {
-    return <main style={{ paddingTop: '120px', paddingBottom: '4rem', textAlign: 'center' }}>Loading checkout...</main>;
+    return <main style={{ paddingTop: '140px', paddingBottom: '4rem', textAlign: 'center' }}>Loading checkout...</main>;
   }
 
   if (!user) {
     return (
-      <main style={{ paddingTop: '120px', paddingBottom: '4rem', textAlign: 'center' }}>
+      <main style={{ paddingTop: '140px', paddingBottom: '4rem', textAlign: 'center' }}>
         <div className="container">
           <div className="glass-panel auth-card" style={{ padding: '3rem' }}>
             <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Registration Required</h2>

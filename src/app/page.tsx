@@ -90,7 +90,7 @@ export default function Home() {
   }, []);
   return (
     <main>
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '120px' }}>
         <div className="ticker-wrap">
           <div className="ticker">
             THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF
