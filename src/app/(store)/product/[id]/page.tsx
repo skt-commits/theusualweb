@@ -18,6 +18,13 @@ export async function generateStaticParams() {
   try {
     const snapshot = await getDocs(collection(db, 'products'));
     snapshot.forEach(doc => {
+      const data = doc.data();
+      // Add slug if available
+      if (data.slug) {
+        if (!ids.find(i => i.id === data.slug)) {
+          ids.push({ id: data.slug });
+        }
+      }
       // Don't add duplicates if they somehow overlap
       if (!ids.find(i => i.id === doc.id)) {
         ids.push({ id: doc.id });

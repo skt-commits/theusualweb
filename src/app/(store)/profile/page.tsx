@@ -241,7 +241,7 @@ export default function UserProfile() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {wishlist.map(item => (
-                    <Link href={`/product/${item.id}`} key={item.id} style={{ display: 'flex', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
+                    <Link href={`/product/${item.slug || item.id}`} key={item.id} style={{ display: 'flex', gap: '1rem', textDecoration: 'none', color: 'inherit' }}>
                       <div style={{ width: '60px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#eee', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
                         <img src={item.image || (item.images && item.images[0])} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={item.name} />
                       </div>

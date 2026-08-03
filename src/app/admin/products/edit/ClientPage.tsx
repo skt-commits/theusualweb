@@ -9,6 +9,7 @@ import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
 
 import { useSearchParams } from 'next/navigation';
+import { getUniqueSlug } from '@/lib/slug';
 
 export default function ClientPage() {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ export default function ClientPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [existingSubcategories, setExistingSubcategories] = useState<string[]>([]);
+  const [originalProduct, setOriginalProduct] = useState<any>(null);
   
   useEffect(() => {
     const fetchSubcategories = async () => {
@@ -119,6 +121,7 @@ export default function ClientPage() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          setOriginalProduct({ id: docSnap.id, ...data });
           const standardSizesForCategory = getStandardSizes(data.category);
           setFormData({
             name: data.name,
@@ -228,10 +231,8 @@ export default function ClientPage() {
         if (!opt.name) continue;
         let imgUrl = opt.existingImage;
         if (opt.imageFile) {
-          const compressionOptions = { maxSizeMB: 0.09, maxWidthOrHeight: 800, useWebWorker: true, initialQuality: 0.6 };
-          const compressedFile = await imageCompression(opt.imageFile, compressionOptions);
-          const storageRef = ref(storage, `products/color_${Date.now()}_${compressedFile.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+          const storageRef = ref(storage, `products/color_${Date.now()}_${opt.imageFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, opt.imageFile);
           await new Promise<void>((resolve, reject) => {
             uploadTask.on('state_changed', null, reject, async () => {
               imgUrl = await getDownloadURL(uploadTask.snapshot.ref);
@@ -247,8 +248,14 @@ export default function ClientPage() {
         });
       }
 
+      let slug = originalProduct?.slug;
+      if (!slug || formData.name !== originalProduct?.name) {
+        slug = await getUniqueSlug(formData.name, id!);
+      }
+
       let updateData: any = {
         name: formData.name,
+        slug: slug,
         price: formData.price.startsWith('₹') ? formData.price : `₹ ${formData.price}`,
         offerPrice: formData.offerPrice ? (formData.offerPrice.startsWith('₹') ? formData.offerPrice : `₹ ${formData.offerPrice}`) : '',
         description: formData.description,
@@ -276,16 +283,8 @@ export default function ClientPage() {
             return;
           }
           
-          const compressionOptions = {
-            maxSizeMB: 0.09,
-            maxWidthOrHeight: 800,
-            useWebWorker: true,
-            initialQuality: 0.6
-          };
-          const compressedFile = await imageCompression(file, compressionOptions);
-
-          const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+          const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, file);
 
           await new Promise<void>((resolve, reject) => {
             uploadTask.on(

@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Link from 'next/link';
+import { getUniqueSlug } from '@/lib/slug';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [subcategoriesMap, setSubcategoriesMap] = useState<Record<string, string[]>>({});
+  const [migrating, setMigrating] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -52,6 +54,32 @@ export default function AdminProducts() {
     setUpdatingId(null);
   };
 
+  const handleMigrateSlugs = async () => {
+    if (!confirm("Are you sure you want to generate slugs for all products that don't have one?")) {
+      return;
+    }
+    setMigrating(true);
+    try {
+      let migratedCount = 0;
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      for (const productDoc of querySnapshot.docs) {
+        const data = productDoc.data();
+        if (!data.slug) {
+          const docId = productDoc.id;
+          const uniqueSlug = await getUniqueSlug(data.name || 'product', docId);
+          await updateDoc(doc(db, 'products', docId), { slug: uniqueSlug });
+          migratedCount++;
+        }
+      }
+      alert(`Successfully generated slugs for ${migratedCount} products!`);
+      fetchProducts();
+    } catch (error) {
+      console.error("Error migrating slugs:", error);
+      alert("Failed to migrate slugs. Check console.");
+    }
+    setMigrating(false);
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
@@ -68,6 +96,9 @@ export default function AdminProducts() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem' }}>Manage Products</h1>
         <div style={{ display: 'flex', gap: '1rem' }}>
+          <button onClick={handleMigrateSlugs} className="btn btn-outline" disabled={migrating || loading}>
+            {migrating ? 'Generating...' : 'Generate Missing Slugs'}
+          </button>
           <Link href="/admin/stock" className="btn btn-outline">Manage Stock</Link>
           <Link href="/admin/products/new" className="btn btn-primary">Add New Product</Link>
         </div>

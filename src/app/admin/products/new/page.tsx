@@ -7,6 +7,7 @@ import { db, storage } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import imageCompression from 'browser-image-compression';
+import { getUniqueSlug } from '@/lib/slug';
 
 export default function NewProduct() {
   const router = useRouter();
@@ -174,18 +175,10 @@ export default function NewProduct() {
           return;
         }
         
-        // 1. Aggressive Compression (Targeting ~70-100KB)
-        const compressionOptions = {
-          maxSizeMB: 0.09, // Compress to strictly under 90-100KB
-          maxWidthOrHeight: 800, // Reduced resolution to ensure small file size
-          useWebWorker: true,
-          initialQuality: 0.6 // Aggressive compression quality
-        };
-        const compressedFile = await imageCompression(file, compressionOptions);
+        // 2. Upload raw file to Firebase Storage to keep 100% original quality (no compression)
+        const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-        // 2. Upload to Firebase Storage
-        const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
         await new Promise<void>((resolve, reject) => {
           uploadTask.on(
@@ -213,10 +206,8 @@ export default function NewProduct() {
         if (!opt.name) continue;
         let imgUrl = "";
         if (opt.imageFile) {
-          const compressionOptions = { maxSizeMB: 0.09, maxWidthOrHeight: 800, useWebWorker: true, initialQuality: 0.6 };
-          const compressedFile = await imageCompression(opt.imageFile, compressionOptions);
-          const storageRef = ref(storage, `products/color_${Date.now()}_${compressedFile.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+          const storageRef = ref(storage, `products/color_${Date.now()}_${opt.imageFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, opt.imageFile);
           await new Promise<void>((resolve, reject) => {
             uploadTask.on('state_changed', null, reject, async () => {
               imgUrl = await getDownloadURL(uploadTask.snapshot.ref);
@@ -239,9 +230,12 @@ export default function NewProduct() {
         }
       });
 
+      const slug = await getUniqueSlug(formData.name);
+
       // 3. Save to Firestore
       await addDoc(collection(db, 'products'), {
         ...formData,
+        slug: slug,
         allSizes: allSizes,
         sizePrices: normalizedSizePrices,
         inStock: inStock,

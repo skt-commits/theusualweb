@@ -12,8 +12,19 @@ export const metadata: Metadata = {
   description: 'Shop the latest collections of Boys, Girls, Mens, and Womens fashion at The Usuals.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://theusuals.in'),
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'YOUR_VERIFICATION_CODE_HERE',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'chkR2hFY8CyH-I8tYDf8bfYL_jZSDqyhJ5NbYT4u8Yo',
   },
+  icons: {
+    icon: [
+      { url: '/favicon/favicon.ico' },
+      { url: '/favicon/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/favicon/apple-touch-icon.png' },
+    ],
+  },
+  manifest: '/favicon/site.webmanifest',
 };
 
 export const viewport: Viewport = {

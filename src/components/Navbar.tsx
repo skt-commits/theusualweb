@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, User, Menu, X, LogOut } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, LogOut, Package, Globe } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
@@ -69,17 +69,29 @@ export default function Navbar() {
     <>
       <div className="ticker-wrap" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1001, height: '36px', padding: '0.4rem 0', background: '#128C7E' }}>
         <div className="ticker" style={{ fontSize: '0.85rem', letterSpacing: '0.05em', color: 'white' }}>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
           <span style={{ margin: '0 3rem' }}>•</span>
-          <span>If in need of bulk order, international order, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', verticalAlign: 'middle' }}>
+            <Package size={14} style={{ flexShrink: 0 }} /> Bulk & <Globe size={14} style={{ flexShrink: 0 }} /> International orders, <a href="https://wa.me/919092214148" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'white' }}>WhatsApp us</a>
+          </span>
         </div>
       </div>
       <nav className="glass-nav" style={{ top: '36px' }}>
@@ -105,7 +117,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`boys-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>
@@ -131,7 +143,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`girls-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>
@@ -157,7 +169,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`fabric-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>
@@ -183,7 +195,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`mens-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>
@@ -209,7 +221,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`womens-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>
@@ -235,7 +247,7 @@ export default function Navbar() {
                       <div className="sub-dropdown-menu">
                         <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Recent in {sub}</div>
                         {recentProducts[`accessories-${sub}`].map(prod => (
-                           <Link href={`/product/${prod.id}`} key={prod.id} className="nav-product-card">
+                           <Link href={`/product/${prod.slug || prod.id}`} key={prod.id} className="nav-product-card">
                              <img src={prod.image || (prod.images && prod.images[0]) || '/placeholder.png'} alt={prod.name} className="nav-product-img" />
                              <div className="nav-product-info">
                                <span className="nav-product-name">{prod.name.length > 20 ? prod.name.substring(0,20)+'...' : prod.name}</span>

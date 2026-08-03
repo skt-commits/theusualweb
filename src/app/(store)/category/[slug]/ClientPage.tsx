@@ -97,12 +97,12 @@ export default function ClientPage({ slug }: { slug: string }) {
                 transition={{ delay: (index % 4) * 0.1 }}
               >
                 <div className="product-img-wrapper">
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.slug || product.id}`}>
                     <img src={product.image} alt={product.name} className="product-img" />
                   </Link>
                 </div>
                 <div className="product-info">
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.slug || product.id}`}>
                     <h4 className="product-name">{product.name}</h4>
                   </Link>
                   {product.offerPrice ? (

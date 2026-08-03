@@ -91,11 +91,6 @@ export default function Home() {
   return (
     <main>
       <div style={{ paddingTop: '120px' }}>
-        <div className="ticker-wrap">
-          <div className="ticker">
-            THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF &nbsp;&nbsp; || &nbsp;&nbsp; THE USUALS &nbsp;&nbsp; || &nbsp;&nbsp; KIDS FASHION &nbsp;&nbsp; || &nbsp;&nbsp; UPTO 50% OFF
-          </div>
-        </div>
       </div>
 
       <section className="hero" style={{ position: 'relative', background: 'var(--accent)', overflow: 'hidden', padding: '0' }}>
@@ -235,12 +230,12 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: index * 0.15 }}
               >
                 <div className="product-img-wrapper">
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.slug || product.id}`}>
                     <img src={product.image} alt={product.name} className="product-img" />
                   </Link>
                 </div>
                 <div className="product-info">
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${product.slug || product.id}`}>
                     <h4 className="product-name">{product.name}</h4>
                   </Link>
                   {product.offerPrice ? (

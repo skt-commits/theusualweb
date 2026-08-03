@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AddToCartButton from '@/components/AddToCartButton';
 import { Star, Heart, Share2 } from 'lucide-react';
-import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 
@@ -46,11 +46,27 @@ export default function ClientPage({ id }: { id: string }) {
           }
         }
 
-        const docRef = doc(db, 'products', actualId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setProduct({ id: docSnap.id, ...data });
+        let productData: any = null;
+        let found = false;
+
+        const q = query(collection(db, 'products'), where('slug', '==', actualId), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const docSnap = querySnapshot.docs[0];
+          productData = { id: docSnap.id, ...docSnap.data() };
+          found = true;
+        } else {
+          const docRef = doc(db, 'products', actualId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            productData = { id: docSnap.id, ...docSnap.data() };
+            found = true;
+          }
+        }
+
+        if (found && productData) {
+          const data = productData;
+          setProduct(productData);
           setActiveImage(data.images && data.images.length > 0 ? data.images[0] : data.image);
           if (data.sizes && data.sizes.length > 0) {
             setSize(data.sizes[0]);

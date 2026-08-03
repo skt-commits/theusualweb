@@ -21,29 +21,34 @@ export default function Cart() {
         ) : (
           <div className="checkout-grid">
             <div className="glass-panel" style={{ padding: '2rem' }}>
-              {items.map((item) => (
-                <div key={item.id} className="cart-item" style={{ alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', gap: '1.5rem' }}>
-                    <Link href={`/product/${item.id}`}>
-                      <img src={item.image} alt={item.name} />
-                    </Link>
-                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: '0.5rem' }}>
-                      <div>
-                        <Link href={`/product/${item.id}`}>
-                          <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{item.name}</h4>
-                        </Link>
-                        <p className="text-gradient" style={{ fontWeight: 'bold', marginBottom: '1rem' }}>{item.price}</p>
-                      </div>
-                      <div style={{ marginTop: 'auto' }}>
-                        <AddToCartButton product={item} />
+              {items.map((item) => {
+                const itemUrl = item.slug 
+                  ? `/product/${item.slug}${item.productId ? item.id.substring(item.productId.length) : ''}`
+                  : `/product/${item.id}`;
+                return (
+                  <div key={item.id} className="cart-item" style={{ alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', gap: '1.5rem' }}>
+                      <Link href={itemUrl}>
+                        <img src={item.image} alt={item.name} />
+                      </Link>
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: '0.5rem' }}>
+                        <div>
+                          <Link href={itemUrl}>
+                            <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{item.name}</h4>
+                          </Link>
+                          <p className="text-gradient" style={{ fontWeight: 'bold', marginBottom: '1rem' }}>{item.price}</p>
+                        </div>
+                        <div style={{ marginTop: 'auto' }}>
+                          <AddToCartButton product={item} />
+                        </div>
                       </div>
                     </div>
+                    <button onClick={() => removeFromCart(item.id)} className="icon-btn" style={{ color: '#ef4444' }}>
+                      <Trash2 size={24} />
+                    </button>
                   </div>
-                  <button onClick={() => removeFromCart(item.id)} className="icon-btn" style={{ color: '#ef4444' }}>
-                    <Trash2 size={24} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <div>
