@@ -6,6 +6,7 @@ import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
 import Link from 'next/link';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'The Usuals - Premium Fashion for Everyone',
@@ -41,6 +42,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-ELC0HSCYLN"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-ELC0HSCYLN');
+          `}
+        </Script>
+      </head>
       <body>
         <AuthProvider>
           <CartProvider>
