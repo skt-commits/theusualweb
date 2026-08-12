@@ -7,6 +7,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import Link from 'next/link';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import Script from 'next/script';
+import CleanUrl from '@/components/CleanUrl';
 
 export const metadata: Metadata = {
   title: 'The Usuals - Premium Fashion for Everyone',
@@ -26,6 +27,9 @@ export const metadata: Metadata = {
     ],
   },
   manifest: '/favicon/site.webmanifest',
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export const viewport: Viewport = {
@@ -60,6 +64,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
+            <CleanUrl />
             <Navbar />
           <div style={{ minHeight: 'calc(100vh - 400px)' }}>
             {children}
